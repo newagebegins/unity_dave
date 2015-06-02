@@ -21,7 +21,7 @@ public class LevelScriptEditor : Editor
     private Mesh mesh;
     private BoxCollider2D collider;
 
-    void OnEnable()
+    private void OnEnable()
     {
         tilemapMesh = (TilemapMesh)target;
         MeshRenderer meshRenderer = tilemapMesh.GetComponent<MeshRenderer>();
@@ -29,6 +29,78 @@ public class LevelScriptEditor : Editor
         MeshFilter meshFilter = tilemapMesh.gameObject.GetComponent<MeshFilter>();
         mesh = meshFilter.sharedMesh;
         collider = tilemapMesh.gameObject.GetComponent<BoxCollider2D>();
+    }
+
+    public override void OnInspectorGUI()
+    {
+        DrawDefaultInspector();
+        if (GUILayout.Button("Resize"))
+        {
+            // TODO: Resize
+        }
+
+        float tilesetScale = 8;
+        float tilesetTileWidth = textureTileWidth * tilesetScale;
+        float tilesetTileHeight = textureTileHeight * tilesetScale;
+        float tilesetWidth = texture.width * tilesetScale;
+        float tilesetHeight = texture.height * tilesetScale;
+
+        GUILayout.Space(8);
+        GUILayout.Space(tilesetHeight);
+        Rect tilesetRect = new Rect(GUILayoutUtility.GetLastRect());
+        tilesetRect.width = tilesetWidth;
+        GUI.DrawTexture(new Rect(tilesetRect.xMin, tilesetRect.yMin, tilesetWidth, tilesetHeight), texture, ScaleMode.ScaleToFit);
+
+        Texture2D overlayTexture = new Texture2D(1, 1);
+        overlayTexture.SetPixel(0, 0, new Color(1, 1, 1, 0.5f));
+
+        // Can draw lines like this:
+        // Handles.DrawLine(new Vector3(lastRect.x, lastRect.y, 0), new Vector3(lastRect.x + 100, lastRect.y + 100, 0));
+        
+        if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && tilesetRect.Contains(Event.current.mousePosition))
+        {
+            selectedTileCol = (int)((Event.current.mousePosition.x - tilesetRect.x) / tilesetTileWidth);
+            selectedTileRow = (int)((Event.current.mousePosition.y - tilesetRect.y) / tilesetTileHeight);
+            Repaint();
+        }
+        
+        GUI.DrawTexture(new Rect(tilesetRect.xMin + selectedTileCol*tilesetTileWidth, tilesetRect.yMin + selectedTileRow*tilesetTileHeight, tilesetTileWidth, tilesetTileHeight), overlayTexture, ScaleMode.ScaleToFit, true);
+    }
+
+    private void OnSceneGUI()
+    {
+        int controlId = GUIUtility.GetControlID(FocusType.Passive);
+        switch (Event.current.type)
+        {
+            case EventType.MouseDown:
+            case EventType.MouseDrag:
+                int tilesCountX = (int)(texture.width / textureTileWidth);
+                int tilesCountY = (int)(texture.height / textureTileHeight);
+                Ray mouseRay = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
+                Vector2 mousePos = new Vector2(mouseRay.origin.x, mouseRay.origin.y);
+                if (Event.current.button == 0 && collider.OverlapPoint(mousePos))
+                {
+                    // User has clicked on the mesh
+                    int col = (int)((mousePos.x - collider.bounds.min.x) / meshSegmentWidth);
+                    int row = (int)((mousePos.y - collider.bounds.min.y) / meshSegmentWidth);
+                    int tileIndex = col + row * tilemapMesh.meshCols;
+
+                    float uvTileWidth = 1.0f / tilesCountX;
+                    float uvTileHeight = 1.0f / tilesCountY;
+
+                    int selectedTileRowConverted = tilesCountY - selectedTileRow - 1; // Convert so that bottom row is zero
+                    Vector2[] newUV = mesh.uv;
+                    newUV[tileIndex * 4 + 0] = new Vector2(selectedTileCol * uvTileWidth, selectedTileRowConverted * uvTileHeight);
+                    newUV[tileIndex * 4 + 1] = new Vector2(selectedTileCol * uvTileWidth, selectedTileRowConverted * uvTileHeight + uvTileHeight);
+                    newUV[tileIndex * 4 + 2] = new Vector2(selectedTileCol * uvTileWidth + uvTileWidth, selectedTileRowConverted * uvTileHeight + uvTileHeight);
+                    newUV[tileIndex * 4 + 3] = new Vector2(selectedTileCol * uvTileWidth + uvTileWidth, selectedTileRowConverted * uvTileHeight);
+                    mesh.uv = newUV;
+                }
+
+                GUIUtility.hotControl = controlId; // Prevent selection from working in the scene view
+                Event.current.Use();
+                break;
+        }
     }
 
     [MenuItem("My Tools/Create Mesh")]
@@ -116,76 +188,4 @@ public class LevelScriptEditor : Editor
         AssetDatabase.SaveAssets();
     }
 #endif
-
-    public override void OnInspectorGUI()
-    {
-        DrawDefaultInspector();
-        if (GUILayout.Button("Resize"))
-        {
-            // TODO: Resize
-        }
-
-        float tilesetScale = 8;
-        float tilesetTileWidth = textureTileWidth * tilesetScale;
-        float tilesetTileHeight = textureTileHeight * tilesetScale;
-        float tilesetWidth = texture.width * tilesetScale;
-        float tilesetHeight = texture.height * tilesetScale;
-
-        GUILayout.Space(8);
-        GUILayout.Space(tilesetHeight);
-        Rect tilesetRect = new Rect(GUILayoutUtility.GetLastRect());
-        tilesetRect.width = tilesetWidth;
-        GUI.DrawTexture(new Rect(tilesetRect.xMin, tilesetRect.yMin, tilesetWidth, tilesetHeight), texture, ScaleMode.ScaleToFit);
-
-        Texture2D overlayTexture = new Texture2D(1, 1);
-        overlayTexture.SetPixel(0, 0, new Color(1, 1, 1, 0.5f));
-
-        // Can draw lines like this:
-        // Handles.DrawLine(new Vector3(lastRect.x, lastRect.y, 0), new Vector3(lastRect.x + 100, lastRect.y + 100, 0));
-        
-        if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && tilesetRect.Contains(Event.current.mousePosition))
-        {
-            selectedTileCol = (int)((Event.current.mousePosition.x - tilesetRect.x) / tilesetTileWidth);
-            selectedTileRow = (int)((Event.current.mousePosition.y - tilesetRect.y) / tilesetTileHeight);
-            Repaint();
-        }
-        
-        GUI.DrawTexture(new Rect(tilesetRect.xMin + selectedTileCol*tilesetTileWidth, tilesetRect.yMin + selectedTileRow*tilesetTileHeight, tilesetTileWidth, tilesetTileHeight), overlayTexture, ScaleMode.ScaleToFit, true);
-    }
-
-    void OnSceneGUI()
-    {
-        int controlId = GUIUtility.GetControlID(FocusType.Passive);
-        switch (Event.current.type)
-        {
-            case EventType.MouseDown:
-            case EventType.MouseDrag:
-                int tilesCountX = (int)(texture.width / textureTileWidth);
-                int tilesCountY = (int)(texture.height / textureTileHeight);
-                Ray mouseRay = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
-                Vector2 mousePos = new Vector2(mouseRay.origin.x, mouseRay.origin.y);
-                if (Event.current.button == 0 && collider.OverlapPoint(mousePos))
-                {
-                    // User has clicked on the mesh
-                    int col = (int)((mousePos.x - collider.bounds.min.x) / meshSegmentWidth);
-                    int row = (int)((mousePos.y - collider.bounds.min.y) / meshSegmentWidth);
-                    int tileIndex = col + row * tilemapMesh.meshCols;
-
-                    float uvTileWidth = 1.0f / tilesCountX;
-                    float uvTileHeight = 1.0f / tilesCountY;
-
-                    int selectedTileRowConverted = tilesCountY - selectedTileRow - 1; // Convert so that bottom row is zero
-                    Vector2[] newUV = mesh.uv;
-                    newUV[tileIndex * 4 + 0] = new Vector2(selectedTileCol * uvTileWidth, selectedTileRowConverted * uvTileHeight);
-                    newUV[tileIndex * 4 + 1] = new Vector2(selectedTileCol * uvTileWidth, selectedTileRowConverted * uvTileHeight + uvTileHeight);
-                    newUV[tileIndex * 4 + 2] = new Vector2(selectedTileCol * uvTileWidth + uvTileWidth, selectedTileRowConverted * uvTileHeight + uvTileHeight);
-                    newUV[tileIndex * 4 + 3] = new Vector2(selectedTileCol * uvTileWidth + uvTileWidth, selectedTileRowConverted * uvTileHeight);
-                    mesh.uv = newUV;
-                }
-
-                GUIUtility.hotControl = controlId; // Prevent selection from working in the scene view
-                Event.current.Use();
-                break;
-        }
-    }
 }
