@@ -7,99 +7,67 @@ public class LevelScriptEditor : Editor
 {
     private int selectedTileCol = 0;
     private int selectedTileRow = 0;
-    private static int cols = 2;
-    private static int rows = 2;
-    private static float segW = 1f;
-    private static float segH = 1f;
+    private static int meshCols = 3;
+    private static int meshRows = 2;
+    private static float meshSegmentWidth = 1f;
+    private static float meshSegmentHeight = 1f;
     private static float textureTileWidth = 8;
     private static float textureTileHeight = 8;
+    private const int verticesPerTile = 4;
+    private const int trianglesPerTile = 2;
+    private const int verticesPerTriangle = 3;
+    private const int triangleIndicesPerTile = trianglesPerTile * verticesPerTriangle;
+    private static int vertexCount = meshRows * meshCols * verticesPerTile;
 
     [MenuItem("My Tools/Create Mesh")]
     private static void CreateMesh()
     {
-        float z = 0;
-
         Mesh mesh = new Mesh();
         mesh.name = "TilemapMesh";
 
-        for (int row = 0; row < rows; ++row)
-        {
-            for (int col = 0; col < cols; ++col)
-            {
+        Vector3[] vertices = new Vector3[vertexCount];
+        int[] triangles = new int[meshRows * meshCols * triangleIndicesPerTile];
 
-            }
+        int tilesCount = meshRows * meshCols;
+        for (int i = 0; i < tilesCount; ++i)
+        {
+            int col = i % meshCols;
+            int row = i / meshCols;
+            float x = -meshSegmentWidth + col * meshSegmentWidth;
+            float y = -meshSegmentHeight + row * meshSegmentHeight;
+            int vertexI = i * verticesPerTile;
+
+            const float z = 0;
+            vertices[vertexI + 0] = new Vector3(x, y, z);
+            vertices[vertexI + 1] = new Vector3(x, y + meshSegmentHeight, z);
+            vertices[vertexI + 2] = new Vector3(x + meshSegmentWidth, y + meshSegmentHeight, z);
+            vertices[vertexI + 3] = new Vector3(x + meshSegmentWidth, y, z);
+
+            int trianglesI = i * triangleIndicesPerTile;
+            triangles[trianglesI + 0] = vertexI + 0;
+            triangles[trianglesI + 1] = vertexI + 1;
+            triangles[trianglesI + 2] = vertexI + 2;
+            triangles[trianglesI + 3] = vertexI + 0;
+            triangles[trianglesI + 4] = vertexI + 2;
+            triangles[trianglesI + 5] = vertexI + 3;
         }
 
-        mesh.vertices = new Vector3[]
-        {      
-            new Vector3(-segW, -segH, z),
-            new Vector3(-segW, 0, z),
-            new Vector3(0, 0, z),
-            new Vector3(0, -segH, z),
-
-            new Vector3(0, -segH, z),
-            new Vector3(0, 0, z),
-            new Vector3(segW, 0, z),
-            new Vector3(segW, -segH, z),
-
-            new Vector3(-segW, 0, z),
-            new Vector3(-segW, segH, z),
-            new Vector3(0, segH, z),
-            new Vector3(0, 0, z),
-
-            new Vector3(0, 0, z),
-            new Vector3(0, segH, z),
-            new Vector3(segW, segH, z),
-            new Vector3(segW, 0, z),
-        };
-        mesh.uv = new Vector2[]
-        {
-            new Vector2(0.0f, 0.0f),
-            new Vector2(0.0f, 0.5f),
-            new Vector2(0.5f, 0.5f),
-            new Vector2(0.5f, 0.0f),
-
-            new Vector2(0.5f, 0.0f),
-            new Vector2(0.5f, 0.5f),
-            new Vector2(1.0f, 0.5f),
-            new Vector2(1.0f, 0.0f),
-
-            new Vector2(0.0f, 0.5f),
-            new Vector2(0.0f, 1.0f),
-            new Vector2(0.5f, 1.0f),
-            new Vector2(0.5f, 0.5f),
-
-            new Vector2(0.5f, 0.5f),
-            new Vector2(0.5f, 1.0f),
-            new Vector2(1.0f, 1.0f),
-            new Vector2(1.0f, 0.5f),
-        };
-        mesh.triangles = new int[]
-        {
-            0, 1, 2,
-            0, 2, 3,
-
-            4, 5, 6,
-            4, 6, 7,
-            
-            8, 9, 10,
-            8, 10, 11,
-
-            12, 13, 14,
-            12, 14, 15,
-        };
+        mesh.vertices = vertices;
+        mesh.triangles = triangles;
+        mesh.uv = new Vector2[vertexCount];
         mesh.RecalculateNormals();
 
-        GameObject go = new GameObject("TilemapMesh");
-        MeshFilter meshFilter = go.AddComponent<MeshFilter>();
+        GameObject gameObject = new GameObject("TilemapMesh");
+        MeshFilter meshFilter = gameObject.AddComponent<MeshFilter>();
         meshFilter.mesh = mesh;
-        MeshRenderer renderer = go.AddComponent<MeshRenderer>();
+        MeshRenderer renderer = gameObject.AddComponent<MeshRenderer>();
         Material material = AssetDatabase.LoadAssetAtPath("Assets/Materials/test.mat", typeof(Material)) as Material;
         renderer.material = material;
-        go.AddComponent<TilemapMesh>();
-        go.AddComponent<BoxCollider2D>();
+        gameObject.AddComponent<TilemapMesh>();
+        gameObject.AddComponent<BoxCollider2D>();
     }
 
+#if false
     [MenuItem("CONTEXT/MeshFilter/Save Mesh...")]
     public static void SaveMeshInPlace(MenuCommand menuCommand)
     {
@@ -131,6 +99,7 @@ public class LevelScriptEditor : Editor
         AssetDatabase.CreateAsset(meshToSave, path);
         AssetDatabase.SaveAssets();
     }
+#endif
 
     public override void OnInspectorGUI()
     {
@@ -180,6 +149,10 @@ public class LevelScriptEditor : Editor
             case EventType.MouseDown:
             case EventType.MouseDrag:
                 TilemapMesh tilemapMesh = (TilemapMesh)target;
+                MeshRenderer meshRenderer = tilemapMesh.GetComponent<MeshRenderer>();
+                Texture2D texture = (Texture2D)meshRenderer.sharedMaterial.mainTexture;
+                int tilesCountX = (int)(texture.width / textureTileWidth);
+                int tilesCountY = (int)(texture.height / textureTileHeight);
                 BoxCollider2D collider = tilemapMesh.gameObject.GetComponent<BoxCollider2D>();
                 MeshFilter meshFilter = tilemapMesh.gameObject.GetComponent<MeshFilter>();
                 Ray mouseRay = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
@@ -187,14 +160,14 @@ public class LevelScriptEditor : Editor
                 if (Event.current.button == 0 && collider.OverlapPoint(mousePos))
                 {
                     // User has clicked on the mesh
-                    int col = (int)((mousePos.x - collider.bounds.min.x) / segW);
-                    int row = (int)((mousePos.y - collider.bounds.min.y) / segW);
-                    int tileIndex = col + row * cols;
+                    int col = (int)((mousePos.x - collider.bounds.min.x) / meshSegmentWidth);
+                    int row = (int)((mousePos.y - collider.bounds.min.y) / meshSegmentWidth);
+                    int tileIndex = col + row * meshCols;
 
-                    float uvTileWidth = 1.0f / cols;
-                    float uvTileHeight = 1.0f / rows;
+                    float uvTileWidth = 1.0f / tilesCountX;
+                    float uvTileHeight = 1.0f / tilesCountY;
 
-                    int selectedTileRowConverted = rows - selectedTileRow - 1; // Convert so that bottom row is zero
+                    int selectedTileRowConverted = meshRows - selectedTileRow - 1; // Convert so that bottom row is zero
                     Vector2[] newUV = meshFilter.sharedMesh.uv;
                     newUV[tileIndex * 4 + 0] = new Vector2(selectedTileCol * uvTileWidth, selectedTileRowConverted * uvTileHeight);
                     newUV[tileIndex * 4 + 1] = new Vector2(selectedTileCol * uvTileWidth, selectedTileRowConverted * uvTileHeight + uvTileHeight);
