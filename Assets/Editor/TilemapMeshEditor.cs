@@ -17,50 +17,9 @@ public class LevelScriptEditor : Editor
     [MenuItem("My Tools/Create Mesh")]
     private static void CreateMesh()
     {
-        Mesh mesh = new Mesh();
-        mesh.name = "TilemapMesh";
-
-        int meshRows = 3;
-        int meshCols = 3;
-        int tilesCount = meshRows * meshCols;
-        int vertexCount = tilesCount * verticesPerTile;
-        float meshHalfWidth = meshCols * meshSegmentWidth / 2f;
-        float meshHalfHeight = meshRows * meshSegmentHeight / 2f;
-
-        Vector3[] vertices = new Vector3[vertexCount];
-        int[] triangles = new int[tilesCount * triangleIndicesPerTile];
-
-        for (int i = 0; i < tilesCount; ++i)
-        {
-            int col = i % meshCols;
-            int row = i / meshCols;
-            float x = -meshHalfWidth + col * meshSegmentWidth;
-            float y = -meshHalfHeight + row * meshSegmentHeight;
-            int vertexI = i * verticesPerTile;
-
-            const float z = 0;
-            vertices[vertexI + 0] = new Vector3(x, y, z);
-            vertices[vertexI + 1] = new Vector3(x, y + meshSegmentHeight, z);
-            vertices[vertexI + 2] = new Vector3(x + meshSegmentWidth, y + meshSegmentHeight, z);
-            vertices[vertexI + 3] = new Vector3(x + meshSegmentWidth, y, z);
-
-            int trianglesI = i * triangleIndicesPerTile;
-            triangles[trianglesI + 0] = vertexI + 0;
-            triangles[trianglesI + 1] = vertexI + 1;
-            triangles[trianglesI + 2] = vertexI + 2;
-            triangles[trianglesI + 3] = vertexI + 0;
-            triangles[trianglesI + 4] = vertexI + 2;
-            triangles[trianglesI + 5] = vertexI + 3;
-        }
-
-        mesh.vertices = vertices;
-        mesh.triangles = triangles;
-        mesh.uv = new Vector2[vertexCount];
-        mesh.RecalculateNormals();
-
         GameObject gameObject = new GameObject("TilemapMesh");
         MeshFilter meshFilter = gameObject.AddComponent<MeshFilter>();
-        meshFilter.mesh = mesh;
+        meshFilter.mesh = GenerateMesh(1, 1);
         MeshRenderer renderer = gameObject.AddComponent<MeshRenderer>();
         Material material = AssetDatabase.LoadAssetAtPath("Assets/Materials/test.mat", typeof(Material)) as Material;
         renderer.material = material;
@@ -73,7 +32,7 @@ public class LevelScriptEditor : Editor
 
     private TilemapMesh tilemapMesh;
     private Texture2D texture;
-    private Mesh mesh;
+    private MeshFilter meshFilter;
     private BoxCollider2D collider;
 
     private void OnEnable()
@@ -81,8 +40,7 @@ public class LevelScriptEditor : Editor
         tilemapMesh = (TilemapMesh)target;
         MeshRenderer meshRenderer = tilemapMesh.GetComponent<MeshRenderer>();
         texture = (Texture2D)meshRenderer.sharedMaterial.mainTexture;
-        MeshFilter meshFilter = tilemapMesh.gameObject.GetComponent<MeshFilter>();
-        mesh = meshFilter.sharedMesh;
+        meshFilter = tilemapMesh.gameObject.GetComponent<MeshFilter>();
         collider = tilemapMesh.gameObject.GetComponent<BoxCollider2D>();
     }
 
@@ -91,44 +49,8 @@ public class LevelScriptEditor : Editor
         DrawDefaultInspector();
         if (GUILayout.Button("Resize"))
         {
-            int tilesCount = tilemapMesh.meshRows * tilemapMesh.meshCols;
-            int vertexCount = tilesCount * verticesPerTile;
-            float meshHalfWidth = tilemapMesh.meshCols * meshSegmentWidth / 2f;
-            float meshHalfHeight = tilemapMesh.meshRows * meshSegmentHeight / 2f;
-
-            Vector3[] vertices = new Vector3[vertexCount];
-            int[] triangles = new int[tilesCount * triangleIndicesPerTile];
-
-            for (int i = 0; i < tilesCount; ++i)
-            {
-                int col = i % tilemapMesh.meshCols;
-                int row = i / tilemapMesh.meshCols;
-                float x = -meshHalfWidth + col * meshSegmentWidth;
-                float y = -meshHalfHeight + row * meshSegmentHeight;
-                int vertexI = i * verticesPerTile;
-
-                const float z = 0;
-                vertices[vertexI + 0] = new Vector3(x, y, z);
-                vertices[vertexI + 1] = new Vector3(x, y + meshSegmentHeight, z);
-                vertices[vertexI + 2] = new Vector3(x + meshSegmentWidth, y + meshSegmentHeight, z);
-                vertices[vertexI + 3] = new Vector3(x + meshSegmentWidth, y, z);
-
-                int trianglesI = i * triangleIndicesPerTile;
-                triangles[trianglesI + 0] = vertexI + 0;
-                triangles[trianglesI + 1] = vertexI + 1;
-                triangles[trianglesI + 2] = vertexI + 2;
-                triangles[trianglesI + 3] = vertexI + 0;
-                triangles[trianglesI + 4] = vertexI + 2;
-                triangles[trianglesI + 5] = vertexI + 3;
-
-                collider.size = new Vector3(tilemapMesh.meshCols * meshSegmentWidth, tilemapMesh.meshRows * meshSegmentHeight, 0);
-            }
-
-            mesh.Clear();
-            mesh.vertices = vertices;
-            mesh.triangles = triangles;
-            mesh.uv = new Vector2[vertexCount];
-            mesh.RecalculateNormals();
+            meshFilter.sharedMesh = GenerateMesh(tilemapMesh.meshCols, tilemapMesh.meshRows);
+            collider.size = new Vector3(tilemapMesh.meshCols * meshSegmentWidth, tilemapMesh.meshRows * meshSegmentHeight, 0);
         }
 
         float tilesetScale = 8;
@@ -159,6 +81,48 @@ public class LevelScriptEditor : Editor
         GUI.DrawTexture(new Rect(tilesetRect.xMin + selectedTileCol*tilesetTileWidth, tilesetRect.yMin + selectedTileRow*tilesetTileHeight, tilesetTileWidth, tilesetTileHeight), overlayTexture, ScaleMode.ScaleToFit, true);
     }
 
+    private static Mesh GenerateMesh(int cols, int rows)
+    {
+        Mesh mesh = new Mesh();
+        mesh.name = "TilemapMesh";
+        int tilesCount = rows * cols;
+        int vertexCount = tilesCount * verticesPerTile;
+        float meshHalfWidth = cols * meshSegmentWidth / 2f;
+        float meshHalfHeight = rows * meshSegmentHeight / 2f;
+
+        Vector3[] vertices = new Vector3[vertexCount];
+        int[] triangles = new int[tilesCount * triangleIndicesPerTile];
+
+        for (int i = 0; i < tilesCount; ++i)
+        {
+            int col = i % cols;
+            int row = i / cols;
+            float x = -meshHalfWidth + col * meshSegmentWidth;
+            float y = -meshHalfHeight + row * meshSegmentHeight;
+            int vertexI = i * verticesPerTile;
+
+            const float z = 0;
+            vertices[vertexI + 0] = new Vector3(x, y, z);
+            vertices[vertexI + 1] = new Vector3(x, y + meshSegmentHeight, z);
+            vertices[vertexI + 2] = new Vector3(x + meshSegmentWidth, y + meshSegmentHeight, z);
+            vertices[vertexI + 3] = new Vector3(x + meshSegmentWidth, y, z);
+
+            int trianglesI = i * triangleIndicesPerTile;
+            triangles[trianglesI + 0] = vertexI + 0;
+            triangles[trianglesI + 1] = vertexI + 1;
+            triangles[trianglesI + 2] = vertexI + 2;
+            triangles[trianglesI + 3] = vertexI + 0;
+            triangles[trianglesI + 4] = vertexI + 2;
+            triangles[trianglesI + 5] = vertexI + 3;
+        }
+
+        mesh.vertices = vertices;
+        mesh.triangles = triangles;
+        mesh.uv = new Vector2[vertexCount];
+        mesh.RecalculateNormals();
+        return mesh;
+    }
+
     private void OnSceneGUI()
     {
         int controlId = GUIUtility.GetControlID(FocusType.Passive);
@@ -181,12 +145,13 @@ public class LevelScriptEditor : Editor
                     float uvTileHeight = 1.0f / tilesCountY;
 
                     int selectedTileRowConverted = tilesCountY - selectedTileRow - 1; // Convert so that bottom row is zero
-                    Vector2[] newUV = mesh.uv;
-                    newUV[tileIndex * 4 + 0] = new Vector2(selectedTileCol * uvTileWidth, selectedTileRowConverted * uvTileHeight);
-                    newUV[tileIndex * 4 + 1] = new Vector2(selectedTileCol * uvTileWidth, selectedTileRowConverted * uvTileHeight + uvTileHeight);
-                    newUV[tileIndex * 4 + 2] = new Vector2(selectedTileCol * uvTileWidth + uvTileWidth, selectedTileRowConverted * uvTileHeight + uvTileHeight);
-                    newUV[tileIndex * 4 + 3] = new Vector2(selectedTileCol * uvTileWidth + uvTileWidth, selectedTileRowConverted * uvTileHeight);
-                    mesh.uv = newUV;
+                    Vector2[] newUV = meshFilter.sharedMesh.uv;
+                    int vertexI = tileIndex * verticesPerTile;
+                    newUV[vertexI + 0] = new Vector2(selectedTileCol * uvTileWidth, selectedTileRowConverted * uvTileHeight);
+                    newUV[vertexI + 1] = new Vector2(selectedTileCol * uvTileWidth, selectedTileRowConverted * uvTileHeight + uvTileHeight);
+                    newUV[vertexI + 2] = new Vector2(selectedTileCol * uvTileWidth + uvTileWidth, selectedTileRowConverted * uvTileHeight + uvTileHeight);
+                    newUV[vertexI + 3] = new Vector2(selectedTileCol * uvTileWidth + uvTileWidth, selectedTileRowConverted * uvTileHeight);
+                    meshFilter.sharedMesh.uv = newUV;
                 }
 
                 GUIUtility.hotControl = controlId; // Prevent selection from working in the scene view
