@@ -7,8 +7,6 @@ public class LevelScriptEditor : Editor
 {
     private int selectedTileCol = 0;
     private int selectedTileRow = 0;
-    private static int meshCols = 3;
-    private static int meshRows = 2;
     private static float meshSegmentWidth = 1f;
     private static float meshSegmentHeight = 1f;
     private static float textureTileWidth = 8;
@@ -17,7 +15,11 @@ public class LevelScriptEditor : Editor
     private const int trianglesPerTile = 2;
     private const int verticesPerTriangle = 3;
     private const int triangleIndicesPerTile = trianglesPerTile * verticesPerTriangle;
-    private static int vertexCount = meshRows * meshCols * verticesPerTile;
+
+    void OnEnable()
+    {
+
+    }
 
     [MenuItem("My Tools/Create Mesh")]
     private static void CreateMesh()
@@ -25,10 +27,14 @@ public class LevelScriptEditor : Editor
         Mesh mesh = new Mesh();
         mesh.name = "TilemapMesh";
 
-        Vector3[] vertices = new Vector3[vertexCount];
-        int[] triangles = new int[meshRows * meshCols * triangleIndicesPerTile];
-
+        int meshRows = 1;
+        int meshCols = 1;
         int tilesCount = meshRows * meshCols;
+        int vertexCount = tilesCount * verticesPerTile;
+
+        Vector3[] vertices = new Vector3[vertexCount];
+        int[] triangles = new int[tilesCount * triangleIndicesPerTile];
+
         for (int i = 0; i < tilesCount; ++i)
         {
             int col = i % meshCols;
@@ -162,12 +168,12 @@ public class LevelScriptEditor : Editor
                     // User has clicked on the mesh
                     int col = (int)((mousePos.x - collider.bounds.min.x) / meshSegmentWidth);
                     int row = (int)((mousePos.y - collider.bounds.min.y) / meshSegmentWidth);
-                    int tileIndex = col + row * meshCols;
+                    int tileIndex = col + row * tilemapMesh.meshCols;
 
                     float uvTileWidth = 1.0f / tilesCountX;
                     float uvTileHeight = 1.0f / tilesCountY;
 
-                    int selectedTileRowConverted = meshRows - selectedTileRow - 1; // Convert so that bottom row is zero
+                    int selectedTileRowConverted = tilesCountY - selectedTileRow - 1; // Convert so that bottom row is zero
                     Vector2[] newUV = meshFilter.sharedMesh.uv;
                     newUV[tileIndex * 4 + 0] = new Vector2(selectedTileCol * uvTileWidth, selectedTileRowConverted * uvTileHeight);
                     newUV[tileIndex * 4 + 1] = new Vector2(selectedTileCol * uvTileWidth, selectedTileRowConverted * uvTileHeight + uvTileHeight);

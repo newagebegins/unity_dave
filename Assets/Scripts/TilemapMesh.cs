@@ -3,6 +3,6 @@ using System.Collections;
 
 public class TilemapMesh : MonoBehaviour
 {
-    public int columns = 3;
-    public int rows = 2;
+    public int meshCols = 1;
+    public int meshRows = 1;
 }
