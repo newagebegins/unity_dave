@@ -69,6 +69,14 @@ public class LevelScriptEditor : Editor
     {
         guiMeshCols = EditorGUILayout.IntField("Mesh Columns", guiMeshCols);
         guiMeshRows = EditorGUILayout.IntField("Mesh Rows", guiMeshRows);
+        if (guiMeshCols < 1)
+        {
+            guiMeshCols = 1;
+        }
+        if (guiMeshRows < 1)
+        {
+            guiMeshRows = 1;
+        }
         if (GUILayout.Button("Resize"))
         {
             Vector3[] newVertices;
@@ -76,13 +84,23 @@ public class LevelScriptEditor : Editor
             GenerateMeshData(guiMeshCols, guiMeshRows, out newVertices, out newTriangles);
             
             // Copy UV data.
-            // TODO: Recpect rows and columns.
             int vertexCount = guiMeshCols * guiMeshRows * verticesPerTile;
             Vector2[] newUV = new Vector2[vertexCount];
-            int minUVLength = Mathf.Min(newUV.Length, meshFilter.sharedMesh.uv.Length);
-            for (int i = 0; i < minUVLength; ++i)
+            int minCols = Mathf.Min(guiMeshCols, tilemapMesh.meshCols);
+            int minRows = Mathf.Min(guiMeshRows, tilemapMesh.meshRows);
+            for (int row = 0; row < minRows; ++row)
             {
-                newUV[i] = meshFilter.sharedMesh.uv[i];
+                for (int col = 0; col < minCols; ++col)
+                {
+                    int newTileI = col + row * guiMeshCols;
+                    int oldTileI = col + row * tilemapMesh.meshCols;
+                    for (int i = 0; i < verticesPerTile; ++i)
+                    {
+                        int i1 = newTileI*verticesPerTile + i;
+                        int i2 = oldTileI*verticesPerTile + i;
+                        newUV[i1] = meshFilter.sharedMesh.uv[i2];
+                    }
+                }
             }
 
             meshFilter.sharedMesh.Clear();
