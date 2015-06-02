@@ -19,7 +19,21 @@ public class LevelScriptEditor : Editor
     {
         GameObject gameObject = new GameObject("TilemapMesh");
         MeshFilter meshFilter = gameObject.AddComponent<MeshFilter>();
-        meshFilter.mesh = GenerateMesh(1, 1);
+
+        Mesh mesh = new Mesh();
+        mesh.name = "TilemapMesh";
+        Vector3[] vertices;
+        int[] triangles;
+        int meshCols = 1;
+        int meshRows = 1;
+        GenerateMeshData(meshCols, meshRows, out vertices, out triangles);
+        mesh.vertices = vertices;
+        mesh.triangles = triangles;
+        int vertexCount = meshRows * meshCols * verticesPerTile;
+        mesh.uv = new Vector2[vertexCount];
+        mesh.RecalculateNormals();
+        
+        meshFilter.mesh = mesh;
         MeshRenderer renderer = gameObject.AddComponent<MeshRenderer>();
         Material material = AssetDatabase.LoadAssetAtPath("Assets/Materials/test.mat", typeof(Material)) as Material;
         renderer.material = material;
@@ -49,7 +63,24 @@ public class LevelScriptEditor : Editor
         DrawDefaultInspector();
         if (GUILayout.Button("Resize"))
         {
-            meshFilter.sharedMesh = GenerateMesh(tilemapMesh.meshCols, tilemapMesh.meshRows);
+            Vector3[] newVertices;
+            int[] newTriangles;
+            GenerateMeshData(tilemapMesh.meshCols, tilemapMesh.meshRows, out newVertices, out newTriangles);
+            
+            // Copy UV data.
+            // TODO: Recpect rows and columns.
+            int vertexCount = tilemapMesh.meshRows * tilemapMesh.meshCols * verticesPerTile;
+            Vector2[] newUV = new Vector2[vertexCount];
+            int minUVLength = Mathf.Min(newUV.Length, meshFilter.sharedMesh.uv.Length);
+            for (int i = 0; i < minUVLength; ++i)
+            {
+                newUV[i] = meshFilter.sharedMesh.uv[i];
+            }
+
+            meshFilter.sharedMesh.Clear();
+            meshFilter.sharedMesh.vertices = newVertices;
+            meshFilter.sharedMesh.triangles = newTriangles;
+            meshFilter.sharedMesh.uv = newUV;
             collider.size = new Vector3(tilemapMesh.meshCols * meshSegmentWidth, tilemapMesh.meshRows * meshSegmentHeight, 0);
         }
 
@@ -81,17 +112,15 @@ public class LevelScriptEditor : Editor
         GUI.DrawTexture(new Rect(tilesetRect.xMin + selectedTileCol*tilesetTileWidth, tilesetRect.yMin + selectedTileRow*tilesetTileHeight, tilesetTileWidth, tilesetTileHeight), overlayTexture, ScaleMode.ScaleToFit, true);
     }
 
-    private static Mesh GenerateMesh(int cols, int rows)
+    private static void GenerateMeshData(int cols, int rows, out Vector3[] vertices, out int[] triangles)
     {
-        Mesh mesh = new Mesh();
-        mesh.name = "TilemapMesh";
         int tilesCount = rows * cols;
         int vertexCount = tilesCount * verticesPerTile;
         float meshHalfWidth = cols * meshSegmentWidth / 2f;
         float meshHalfHeight = rows * meshSegmentHeight / 2f;
 
-        Vector3[] vertices = new Vector3[vertexCount];
-        int[] triangles = new int[tilesCount * triangleIndicesPerTile];
+        vertices = new Vector3[vertexCount];
+        triangles = new int[tilesCount * triangleIndicesPerTile];
 
         for (int i = 0; i < tilesCount; ++i)
         {
@@ -115,12 +144,6 @@ public class LevelScriptEditor : Editor
             triangles[trianglesI + 4] = vertexI + 2;
             triangles[trianglesI + 5] = vertexI + 3;
         }
-
-        mesh.vertices = vertices;
-        mesh.triangles = triangles;
-        mesh.uv = new Vector2[vertexCount];
-        mesh.RecalculateNormals();
-        return mesh;
     }
 
     private void OnSceneGUI()
