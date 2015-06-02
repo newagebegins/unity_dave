@@ -20,6 +20,9 @@ public class LevelScriptEditor : Editor
         GameObject gameObject = new GameObject("TilemapMesh");
         MeshFilter meshFilter = gameObject.AddComponent<MeshFilter>();
 
+        // TODO: Maybe I should use DestroyImmediate() on the generated material when game object is deleted
+        // to prevent "leaked objects" error?
+        // See http://answers.unity3d.com/questions/38960/cleaning-up-leaked-objects-in-scene-since-no-game.html
         Mesh mesh = new Mesh();
         mesh.name = "TilemapMesh";
         Vector3[] vertices;
@@ -43,6 +46,8 @@ public class LevelScriptEditor : Editor
 
     private int selectedTileCol = 0;
     private int selectedTileRow = 0;
+    private int guiMeshCols = 0;
+    private int guiMeshRows = 0;
 
     private TilemapMesh tilemapMesh;
     private Texture2D texture;
@@ -56,20 +61,23 @@ public class LevelScriptEditor : Editor
         texture = (Texture2D)meshRenderer.sharedMaterial.mainTexture;
         meshFilter = tilemapMesh.gameObject.GetComponent<MeshFilter>();
         collider = tilemapMesh.gameObject.GetComponent<BoxCollider2D>();
+        guiMeshCols = tilemapMesh.meshCols;
+        guiMeshRows = tilemapMesh.meshRows;
     }
 
     public override void OnInspectorGUI()
     {
-        DrawDefaultInspector();
+        guiMeshCols = EditorGUILayout.IntField("Mesh Columns", guiMeshCols);
+        guiMeshRows = EditorGUILayout.IntField("Mesh Rows", guiMeshRows);
         if (GUILayout.Button("Resize"))
         {
             Vector3[] newVertices;
             int[] newTriangles;
-            GenerateMeshData(tilemapMesh.meshCols, tilemapMesh.meshRows, out newVertices, out newTriangles);
+            GenerateMeshData(guiMeshCols, guiMeshRows, out newVertices, out newTriangles);
             
             // Copy UV data.
             // TODO: Recpect rows and columns.
-            int vertexCount = tilemapMesh.meshRows * tilemapMesh.meshCols * verticesPerTile;
+            int vertexCount = guiMeshCols * guiMeshRows * verticesPerTile;
             Vector2[] newUV = new Vector2[vertexCount];
             int minUVLength = Mathf.Min(newUV.Length, meshFilter.sharedMesh.uv.Length);
             for (int i = 0; i < minUVLength; ++i)
@@ -81,7 +89,11 @@ public class LevelScriptEditor : Editor
             meshFilter.sharedMesh.vertices = newVertices;
             meshFilter.sharedMesh.triangles = newTriangles;
             meshFilter.sharedMesh.uv = newUV;
-            collider.size = new Vector3(tilemapMesh.meshCols * meshSegmentWidth, tilemapMesh.meshRows * meshSegmentHeight, 0);
+
+            collider.size = new Vector3(guiMeshCols * meshSegmentWidth, guiMeshRows * meshSegmentHeight, 0);
+            
+            tilemapMesh.meshCols = guiMeshCols;
+            tilemapMesh.meshRows = guiMeshRows;
         }
 
         float tilesetScale = 8;
