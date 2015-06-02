@@ -16,9 +16,19 @@ public class LevelScriptEditor : Editor
     private const int verticesPerTriangle = 3;
     private const int triangleIndicesPerTile = trianglesPerTile * verticesPerTriangle;
 
+    private TilemapMesh tilemapMesh;
+    private Texture2D texture;
+    private Mesh mesh;
+    private BoxCollider2D collider;
+
     void OnEnable()
     {
-
+        tilemapMesh = (TilemapMesh)target;
+        MeshRenderer meshRenderer = tilemapMesh.GetComponent<MeshRenderer>();
+        texture = (Texture2D)meshRenderer.sharedMaterial.mainTexture;
+        MeshFilter meshFilter = tilemapMesh.gameObject.GetComponent<MeshFilter>();
+        mesh = meshFilter.sharedMesh;
+        collider = tilemapMesh.gameObject.GetComponent<BoxCollider2D>();
     }
 
     [MenuItem("My Tools/Create Mesh")]
@@ -115,10 +125,6 @@ public class LevelScriptEditor : Editor
             // TODO: Resize
         }
 
-        TilemapMesh tilemapMesh = (TilemapMesh)target;
-        MeshRenderer meshRenderer = tilemapMesh.GetComponent<MeshRenderer>();
-        Texture2D texture = (Texture2D)meshRenderer.sharedMaterial.mainTexture;
-
         float tilesetScale = 8;
         float tilesetTileWidth = textureTileWidth * tilesetScale;
         float tilesetTileHeight = textureTileHeight * tilesetScale;
@@ -154,13 +160,8 @@ public class LevelScriptEditor : Editor
         {
             case EventType.MouseDown:
             case EventType.MouseDrag:
-                TilemapMesh tilemapMesh = (TilemapMesh)target;
-                MeshRenderer meshRenderer = tilemapMesh.GetComponent<MeshRenderer>();
-                Texture2D texture = (Texture2D)meshRenderer.sharedMaterial.mainTexture;
                 int tilesCountX = (int)(texture.width / textureTileWidth);
                 int tilesCountY = (int)(texture.height / textureTileHeight);
-                BoxCollider2D collider = tilemapMesh.gameObject.GetComponent<BoxCollider2D>();
-                MeshFilter meshFilter = tilemapMesh.gameObject.GetComponent<MeshFilter>();
                 Ray mouseRay = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
                 Vector2 mousePos = new Vector2(mouseRay.origin.x, mouseRay.origin.y);
                 if (Event.current.button == 0 && collider.OverlapPoint(mousePos))
@@ -174,12 +175,12 @@ public class LevelScriptEditor : Editor
                     float uvTileHeight = 1.0f / tilesCountY;
 
                     int selectedTileRowConverted = tilesCountY - selectedTileRow - 1; // Convert so that bottom row is zero
-                    Vector2[] newUV = meshFilter.sharedMesh.uv;
+                    Vector2[] newUV = mesh.uv;
                     newUV[tileIndex * 4 + 0] = new Vector2(selectedTileCol * uvTileWidth, selectedTileRowConverted * uvTileHeight);
                     newUV[tileIndex * 4 + 1] = new Vector2(selectedTileCol * uvTileWidth, selectedTileRowConverted * uvTileHeight + uvTileHeight);
                     newUV[tileIndex * 4 + 2] = new Vector2(selectedTileCol * uvTileWidth + uvTileWidth, selectedTileRowConverted * uvTileHeight + uvTileHeight);
                     newUV[tileIndex * 4 + 3] = new Vector2(selectedTileCol * uvTileWidth + uvTileWidth, selectedTileRowConverted * uvTileHeight);
-                    meshFilter.sharedMesh.uv = newUV;
+                    mesh.uv = newUV;
                 }
 
                 GUIUtility.hotControl = controlId; // Prevent selection from working in the scene view
