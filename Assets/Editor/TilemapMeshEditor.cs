@@ -27,9 +27,10 @@ public class LevelScriptEditor : Editor
         mesh.name = "TilemapMesh";
         Vector3[] vertices;
         int[] triangles;
+        Vector2 centerPos;
         int meshCols = 1;
         int meshRows = 1;
-        GenerateMeshData(meshCols, meshRows, out vertices, out triangles);
+        GenerateMeshData(meshCols, meshRows, out vertices, out triangles, out centerPos);
         mesh.vertices = vertices;
         mesh.triangles = triangles;
         int vertexCount = meshRows * meshCols * verticesPerTile;
@@ -42,6 +43,7 @@ public class LevelScriptEditor : Editor
         renderer.material = material;
         gameObject.AddComponent<TilemapMesh>();
         gameObject.AddComponent<BoxCollider2D>();
+        gameObject.transform.position = centerPos;
     }
 
     private int selectedTileCol = 0;
@@ -59,8 +61,8 @@ public class LevelScriptEditor : Editor
         tilemapMesh = (TilemapMesh)target;
         MeshRenderer meshRenderer = tilemapMesh.GetComponent<MeshRenderer>();
         texture = (Texture2D)meshRenderer.sharedMaterial.mainTexture;
-        meshFilter = tilemapMesh.gameObject.GetComponent<MeshFilter>();
-        collider = tilemapMesh.gameObject.GetComponent<BoxCollider2D>();
+        meshFilter = tilemapMesh.GetComponent<MeshFilter>();
+        collider = tilemapMesh.GetComponent<BoxCollider2D>();
         guiMeshCols = tilemapMesh.meshCols;
         guiMeshRows = tilemapMesh.meshRows;
     }
@@ -81,7 +83,8 @@ public class LevelScriptEditor : Editor
         {
             Vector3[] newVertices;
             int[] newTriangles;
-            GenerateMeshData(guiMeshCols, guiMeshRows, out newVertices, out newTriangles);
+            Vector2 centerPos;
+            GenerateMeshData(guiMeshCols, guiMeshRows, out newVertices, out newTriangles, out centerPos);
             
             // Copy UV data.
             int vertexCount = guiMeshCols * guiMeshRows * verticesPerTile;
@@ -109,6 +112,7 @@ public class LevelScriptEditor : Editor
             meshFilter.sharedMesh.uv = newUV;
 
             collider.size = new Vector3(guiMeshCols * meshSegmentWidth, guiMeshRows * meshSegmentHeight, 0);
+            tilemapMesh.gameObject.transform.position = centerPos;
             
             tilemapMesh.meshCols = guiMeshCols;
             tilemapMesh.meshRows = guiMeshRows;
@@ -142,7 +146,7 @@ public class LevelScriptEditor : Editor
         GUI.DrawTexture(new Rect(tilesetRect.xMin + selectedTileCol*tilesetTileWidth, tilesetRect.yMin + selectedTileRow*tilesetTileHeight, tilesetTileWidth, tilesetTileHeight), overlayTexture, ScaleMode.ScaleToFit, true);
     }
 
-    private static void GenerateMeshData(int cols, int rows, out Vector3[] vertices, out int[] triangles)
+    private static void GenerateMeshData(int cols, int rows, out Vector3[] vertices, out int[] triangles, out Vector2 centerPos)
     {
         int tilesCount = rows * cols;
         int vertexCount = tilesCount * verticesPerTile;
@@ -151,6 +155,7 @@ public class LevelScriptEditor : Editor
 
         vertices = new Vector3[vertexCount];
         triangles = new int[tilesCount * triangleIndicesPerTile];
+        centerPos = new Vector2(meshHalfWidth, meshHalfHeight);
 
         for (int i = 0; i < tilesCount; ++i)
         {
