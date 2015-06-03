@@ -201,38 +201,35 @@ public class LevelScriptEditor : Editor
 
     private void OnSceneGUI()
     {
-        switch (Event.current.type)
+        if ((Event.current.type == EventType.MouseDown || Event.current.type == EventType.MouseDrag) && Event.current.button == 0)
         {
-            case EventType.MouseDown:
-            case EventType.MouseDrag:
+            Ray mouseRay = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
+            Vector2 mousePos = new Vector2(mouseRay.origin.x, mouseRay.origin.y);
+            if (collider.OverlapPoint(mousePos))
+            {
+                // User has clicked on the mesh
+                int col = (int)((mousePos.x - collider.bounds.min.x) / meshSegmentWidth);
+                int row = (int)((mousePos.y - collider.bounds.min.y) / meshSegmentWidth);
+                int tileIndex = col + row * tilemapMesh.meshCols;
+
                 int tilesCountX = (int)(texture.width / textureTileWidth);
                 int tilesCountY = (int)(texture.height / textureTileHeight);
-                Ray mouseRay = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
-                Vector2 mousePos = new Vector2(mouseRay.origin.x, mouseRay.origin.y);
-                if (Event.current.button == 0 && collider.OverlapPoint(mousePos))
-                {
-                    // User has clicked on the mesh
-                    int col = (int)((mousePos.x - collider.bounds.min.x) / meshSegmentWidth);
-                    int row = (int)((mousePos.y - collider.bounds.min.y) / meshSegmentWidth);
-                    int tileIndex = col + row * tilemapMesh.meshCols;
+                float uvTileWidth = 1.0f / tilesCountX;
+                float uvTileHeight = 1.0f / tilesCountY;
 
-                    float uvTileWidth = 1.0f / tilesCountX;
-                    float uvTileHeight = 1.0f / tilesCountY;
+                int selectedTileRowConverted = tilesCountY - selectedTileRow - 1; // Convert so that bottom row is zero
+                Vector2[] newUV = meshFilter.sharedMesh.uv;
+                int vertexI = tileIndex * verticesPerTile;
+                newUV[vertexI + 0] = new Vector2(selectedTileCol * uvTileWidth, selectedTileRowConverted * uvTileHeight);
+                newUV[vertexI + 1] = new Vector2(selectedTileCol * uvTileWidth, selectedTileRowConverted * uvTileHeight + uvTileHeight);
+                newUV[vertexI + 2] = new Vector2(selectedTileCol * uvTileWidth + uvTileWidth, selectedTileRowConverted * uvTileHeight + uvTileHeight);
+                newUV[vertexI + 3] = new Vector2(selectedTileCol * uvTileWidth + uvTileWidth, selectedTileRowConverted * uvTileHeight);
+                meshFilter.sharedMesh.uv = newUV;
 
-                    int selectedTileRowConverted = tilesCountY - selectedTileRow - 1; // Convert so that bottom row is zero
-                    Vector2[] newUV = meshFilter.sharedMesh.uv;
-                    int vertexI = tileIndex * verticesPerTile;
-                    newUV[vertexI + 0] = new Vector2(selectedTileCol * uvTileWidth, selectedTileRowConverted * uvTileHeight);
-                    newUV[vertexI + 1] = new Vector2(selectedTileCol * uvTileWidth, selectedTileRowConverted * uvTileHeight + uvTileHeight);
-                    newUV[vertexI + 2] = new Vector2(selectedTileCol * uvTileWidth + uvTileWidth, selectedTileRowConverted * uvTileHeight + uvTileHeight);
-                    newUV[vertexI + 3] = new Vector2(selectedTileCol * uvTileWidth + uvTileWidth, selectedTileRowConverted * uvTileHeight);
-                    meshFilter.sharedMesh.uv = newUV;
-
-                    int controlId = GUIUtility.GetControlID(FocusType.Passive);
-                    GUIUtility.hotControl = controlId; // Prevent other instruments from gaining focus while painting
-                    Event.current.Use();
-                }
-                break;
+                int controlId = GUIUtility.GetControlID(FocusType.Passive);
+                GUIUtility.hotControl = controlId; // Prevent other instruments from gaining focus while painting
+                Event.current.Use();
+            }
         }
     }
 
