@@ -178,7 +178,6 @@ public class LevelScriptEditor : Editor
 
     private void OnSceneGUI()
     {
-        int controlId = GUIUtility.GetControlID(FocusType.Passive);
         switch (Event.current.type)
         {
             case EventType.MouseDown:
@@ -205,10 +204,11 @@ public class LevelScriptEditor : Editor
                     newUV[vertexI + 2] = new Vector2(selectedTileCol * uvTileWidth + uvTileWidth, selectedTileRowConverted * uvTileHeight + uvTileHeight);
                     newUV[vertexI + 3] = new Vector2(selectedTileCol * uvTileWidth + uvTileWidth, selectedTileRowConverted * uvTileHeight);
                     meshFilter.sharedMesh.uv = newUV;
-                }
 
-                GUIUtility.hotControl = controlId; // Prevent selection from working in the scene view
-                Event.current.Use();
+                    int controlId = GUIUtility.GetControlID(FocusType.Passive);
+                    GUIUtility.hotControl = controlId; // Prevent other instruments from gaining focus while painting
+                    Event.current.Use();
+                }
                 break;
         }
     }
