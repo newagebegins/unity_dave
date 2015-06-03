@@ -65,6 +65,24 @@ public class LevelScriptEditor : Editor
         collider = tilemapMesh.GetComponent<BoxCollider2D>();
         guiMeshCols = tilemapMesh.meshCols;
         guiMeshRows = tilemapMesh.meshRows;
+        
+        // If texture size has changed
+        if ((tilemapMesh.textureWidth > 0 && tilemapMesh.textureHeight > 0) &&
+            (texture.width != tilemapMesh.textureWidth || texture.height != tilemapMesh.textureHeight))
+        {
+            // Recalculate mesh UVs
+            Vector2[] newUV = meshFilter.sharedMesh.uv;
+            for (int i = 0; i < newUV.Length; ++i)
+            {
+                float kX = (float)tilemapMesh.textureWidth / (float)texture.width;
+                float kY = (float)tilemapMesh.textureHeight / (float)texture.height;
+                newUV[i] = new Vector2(kX * newUV[i].x, kY * newUV[i].y);
+            }
+            meshFilter.sharedMesh.uv = newUV;
+        }
+        
+        tilemapMesh.textureWidth = texture.width;
+        tilemapMesh.textureHeight = texture.height;
     }
 
     public override void OnInspectorGUI()
@@ -79,7 +97,7 @@ public class LevelScriptEditor : Editor
         {
             guiMeshRows = 1;
         }
-        if (GUILayout.Button("Resize"))
+        if (GUILayout.Button("Resize Mesh"))
         {
             Vector3[] newVertices;
             int[] newTriangles;
