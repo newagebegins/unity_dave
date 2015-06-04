@@ -328,18 +328,6 @@ public class LevelScriptEditor : Editor
         // Tilemap game object has a child game object that contains one polygon collider
         // that encompasses all solid tiles.
 
-        const string colliderObjectName = "Collider";
-
-        Transform colliderObject = tilemapMesh.transform.Find(colliderObjectName);
-        if (colliderObject)
-        {
-            DestroyImmediate(colliderObject.gameObject);
-        }
-
-        GameObject gameObject = new GameObject(colliderObjectName);
-        gameObject.transform.parent = tilemapMesh.transform;
-        PolygonCollider2D polygonCollider = gameObject.AddComponent<PolygonCollider2D>();
-
         // Gather all solid tiles.
         List<Vector2> unvisitedSolidTiles = new List<Vector2>();
         for (int row = 0; row < tilemapMesh.meshRows; ++row)
@@ -360,24 +348,25 @@ public class LevelScriptEditor : Editor
             List<Vector2> island = new List<Vector2>();
             List<Vector2> tilesToVisit = new List<Vector2>();
             tilesToVisit.Add(unvisitedSolidTiles[0]);
+            unvisitedSolidTiles.RemoveAt(0);
             while (tilesToVisit.Count > 0)
             {
                 Vector2 tile = tilesToVisit[0];
                 island.Add(tile);
                 tilesToVisit.RemoveAt(0);
-                unvisitedSolidTiles.RemoveAt(0);
                 Vector2[] neighbours = new Vector2[]
-                    {
-                        new Vector2(tile.x + 1, tile.y),
-                        new Vector2(tile.x - 1, tile.y),
-                        new Vector2(tile.x, tile.y + 1),
-                        new Vector2(tile.x, tile.y - 1),
-                    };
+                {
+                    new Vector2(tile.x + 1, tile.y),
+                    new Vector2(tile.x - 1, tile.y),
+                    new Vector2(tile.x, tile.y + 1),
+                    new Vector2(tile.x, tile.y - 1),
+                };
                 foreach (Vector2 neighbour in neighbours)
                 {
                     if (unvisitedSolidTiles.Contains(neighbour))
                     {
                         tilesToVisit.Add(neighbour);
+                        unvisitedSolidTiles.Remove(neighbour);
                     }
                 }
             }
@@ -387,7 +376,19 @@ public class LevelScriptEditor : Editor
         // Create paths for the polygon collider.
         if (solidIslands.Count > 0)
         {
+            const string colliderObjectName = "Collider";
+
+            Transform colliderObject = tilemapMesh.transform.Find(colliderObjectName);
+            if (colliderObject)
+            {
+                DestroyImmediate(colliderObject.gameObject);
+            }
+
+            GameObject gameObject = new GameObject(colliderObjectName);
+            gameObject.transform.parent = tilemapMesh.transform;
+            PolygonCollider2D polygonCollider = gameObject.AddComponent<PolygonCollider2D>();
             polygonCollider.pathCount = solidIslands.Count;
+            
             for (int islandI = 0; islandI < solidIslands.Count; ++islandI)
             {
                 // We traverse island's outline and create new path points where outline has corners.
