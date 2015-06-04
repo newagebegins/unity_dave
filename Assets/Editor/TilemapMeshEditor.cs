@@ -136,204 +136,13 @@ public class LevelScriptEditor : Editor
             
             tilemapMesh.meshCols = guiMeshCols;
             tilemapMesh.meshRows = guiMeshRows;
+
+            GenerateCollider();
         }
 
-        if (GUILayout.Button("Generate collider"))
+        if (GUILayout.Button("Generate Collider"))
         {
-            // Tilemap game object has a child game object that contains one polygon collider
-            // that encompasses all solid tiles.
-            
-            const string colliderObjectName = "Collider";
-            PolygonCollider2D polygonCollider;
-            Transform colliderObject = tilemapMesh.transform.Find(colliderObjectName);
-            if (colliderObject)
-            {
-                polygonCollider = colliderObject.GetComponent<PolygonCollider2D>();
-            }
-            else
-            {
-                GameObject gameObject = new GameObject(colliderObjectName);
-                gameObject.transform.parent = tilemapMesh.transform;
-                polygonCollider = gameObject.AddComponent<PolygonCollider2D>();
-            }
-
-            // Gather all solid tiles.
-            List<Vector2> unvisitedSolidTiles = new List<Vector2>();
-            for (int row = 0; row < tilemapMesh.meshRows; ++row)
-            {
-                for (int col = 0; col < tilemapMesh.meshCols; ++col)
-                {
-                    if (IsSolidTile(col, row))
-                    {
-                        unvisitedSolidTiles.Add(new Vector2(col, row));
-                    }
-                }
-            }
-
-            // Gather "islands" of contiguous tiles.
-            List<List<Vector2>> solidIslands = new List<List<Vector2>>();
-            while (unvisitedSolidTiles.Count > 0)
-            {
-                List<Vector2> island = new List<Vector2>();
-                List<Vector2> tilesToVisit = new List<Vector2>();
-                tilesToVisit.Add(unvisitedSolidTiles[0]);
-                while (tilesToVisit.Count > 0)
-                {
-                    Vector2 tile = tilesToVisit[0];
-                    island.Add(tile);
-                    tilesToVisit.RemoveAt(0);
-                    unvisitedSolidTiles.RemoveAt(0);
-                    Vector2[] neighbours = new Vector2[]
-                    {
-                        new Vector2(tile.x + 1, tile.y),
-                        new Vector2(tile.x - 1, tile.y),
-                        new Vector2(tile.x, tile.y + 1),
-                        new Vector2(tile.x, tile.y - 1),
-                    };
-                    foreach (Vector2 neighbour in neighbours)
-                    {
-                        if (unvisitedSolidTiles.Contains(neighbour))
-                        {
-                            tilesToVisit.Add(neighbour);
-                        }
-                    }
-                }
-                solidIslands.Add(island);
-            }
-
-            // Create paths for the polygon collider.
-            if (solidIslands.Count > 0)
-            {
-                polygonCollider.pathCount = solidIslands.Count;
-                for (int islandI = 0; islandI < solidIslands.Count; ++islandI)
-                {
-                    // We traverse island's outline and create new path points where outline has corners.
-
-                    List<Vector2> island = solidIslands[islandI];
-                    List<Vector2> pathPoints = new List<Vector2>();
-                    Vector2 currentTile = island[0];
-                    pathPoints.Add(MeshTileCornerPoint(currentTile, Corner.BottomLeft));
-                    Direction direction = Direction.Right;
-                    bool working = true;
-                    while (working)
-                    {
-                        Vector2? newPathPoint = null;
-
-                        Vector2 rightNeighbor = new Vector2(currentTile.x + 1, currentTile.y);
-                        Vector2 bottomRightNeighbor = new Vector2(currentTile.x + 1, currentTile.y - 1);
-                        Vector2 topRightNeighbor = new Vector2(currentTile.x + 1, currentTile.y + 1);
-                        Vector2 leftNeighbor = new Vector2(currentTile.x - 1, currentTile.y);
-                        Vector2 bottomLeftNeighbor = new Vector2(currentTile.x - 1, currentTile.y - 1);
-                        Vector2 topLeftNeighbor = new Vector2(currentTile.x - 1, currentTile.y + 1);
-                        Vector2 topNeighbor = new Vector2(currentTile.x, currentTile.y + 1);
-                        Vector2 bottomNeighbor = new Vector2(currentTile.x, currentTile.y - 1);
-
-                        switch (direction)
-                        {
-                            // Moving right along the bottom edge
-                            case Direction.Right:
-                                if (island.Contains(rightNeighbor))
-                                {
-                                    if (island.Contains(bottomRightNeighbor))
-                                    {
-                                        newPathPoint = MeshTileCornerPoint(currentTile, Corner.BottomRight);
-                                        direction = Direction.Down;
-                                        currentTile = bottomRightNeighbor;
-                                    }
-                                    else
-                                    {
-                                        currentTile = rightNeighbor;
-                                    }
-                                }
-                                else
-                                {
-                                    newPathPoint = MeshTileCornerPoint(currentTile, Corner.BottomRight);
-                                    direction = Direction.Up;
-                                }
-                                break;
-
-                            // Moving left along the top edge
-                            case Direction.Left:
-                                if (island.Contains(leftNeighbor))
-                                {
-                                    if (island.Contains(topLeftNeighbor))
-                                    {
-                                        newPathPoint = MeshTileCornerPoint(currentTile, Corner.TopLeft);
-                                        direction = Direction.Up;
-                                        currentTile = topLeftNeighbor;
-                                    }
-                                    else
-                                    {
-                                        currentTile = leftNeighbor;
-                                    }
-                                }
-                                else
-                                {
-                                    newPathPoint = MeshTileCornerPoint(currentTile, Corner.TopLeft);
-                                    direction = Direction.Down;
-                                }
-                                break;
-
-                            // Moving up along the right edge
-                            case Direction.Up:
-                                if (island.Contains(topNeighbor))
-                                {
-                                    if (island.Contains(topRightNeighbor))
-                                    {
-                                        newPathPoint = MeshTileCornerPoint(currentTile, Corner.TopRight);
-                                        direction = Direction.Right;
-                                        currentTile = topRightNeighbor;
-                                    }
-                                    else
-                                    {
-                                        currentTile = topNeighbor;
-                                    }
-                                }
-                                else
-                                {
-                                    newPathPoint = MeshTileCornerPoint(currentTile, Corner.TopRight);
-                                    direction = Direction.Left;
-                                }
-                                break;
-
-                            // Moving down along the left edge
-                            case Direction.Down:
-                                if (island.Contains(bottomNeighbor))
-                                {
-                                    if (island.Contains(bottomLeftNeighbor))
-                                    {
-                                        newPathPoint = MeshTileCornerPoint(currentTile, Corner.BottomLeft);
-                                        direction = Direction.Left;
-                                        currentTile = bottomLeftNeighbor;
-                                    }
-                                    else
-                                    {
-                                        currentTile = bottomNeighbor;
-                                    }
-                                }
-                                else
-                                {
-                                    newPathPoint = MeshTileCornerPoint(currentTile, Corner.BottomLeft);
-                                    direction = Direction.Right;
-                                }
-                                break;
-                        }
-
-                        if (newPathPoint != null)
-                        {
-                            if (newPathPoint == pathPoints[0])
-                            {
-                                working = false;
-                            }
-                            else
-                            {
-                                pathPoints.Add((Vector2)newPathPoint);
-                            }
-                        }
-                    }
-                    polygonCollider.SetPath(islandI, pathPoints.ToArray());
-                }
-            }
+            GenerateCollider();
         }
 
         // Draw a tileset.
@@ -510,6 +319,202 @@ public class LevelScriptEditor : Editor
                 int controlId = GUIUtility.GetControlID(FocusType.Passive);
                 GUIUtility.hotControl = controlId; // Prevent other instruments from gaining focus while painting
                 Event.current.Use();
+            }
+        }
+    }
+
+    private void GenerateCollider()
+    {
+        // Tilemap game object has a child game object that contains one polygon collider
+        // that encompasses all solid tiles.
+
+        const string colliderObjectName = "Collider";
+
+        Transform colliderObject = tilemapMesh.transform.Find(colliderObjectName);
+        if (colliderObject)
+        {
+            DestroyImmediate(colliderObject.gameObject);
+        }
+
+        GameObject gameObject = new GameObject(colliderObjectName);
+        gameObject.transform.parent = tilemapMesh.transform;
+        PolygonCollider2D polygonCollider = gameObject.AddComponent<PolygonCollider2D>();
+
+        // Gather all solid tiles.
+        List<Vector2> unvisitedSolidTiles = new List<Vector2>();
+        for (int row = 0; row < tilemapMesh.meshRows; ++row)
+        {
+            for (int col = 0; col < tilemapMesh.meshCols; ++col)
+            {
+                if (IsSolidTile(col, row))
+                {
+                    unvisitedSolidTiles.Add(new Vector2(col, row));
+                }
+            }
+        }
+
+        // Gather "islands" of contiguous tiles.
+        List<List<Vector2>> solidIslands = new List<List<Vector2>>();
+        while (unvisitedSolidTiles.Count > 0)
+        {
+            List<Vector2> island = new List<Vector2>();
+            List<Vector2> tilesToVisit = new List<Vector2>();
+            tilesToVisit.Add(unvisitedSolidTiles[0]);
+            while (tilesToVisit.Count > 0)
+            {
+                Vector2 tile = tilesToVisit[0];
+                island.Add(tile);
+                tilesToVisit.RemoveAt(0);
+                unvisitedSolidTiles.RemoveAt(0);
+                Vector2[] neighbours = new Vector2[]
+                    {
+                        new Vector2(tile.x + 1, tile.y),
+                        new Vector2(tile.x - 1, tile.y),
+                        new Vector2(tile.x, tile.y + 1),
+                        new Vector2(tile.x, tile.y - 1),
+                    };
+                foreach (Vector2 neighbour in neighbours)
+                {
+                    if (unvisitedSolidTiles.Contains(neighbour))
+                    {
+                        tilesToVisit.Add(neighbour);
+                    }
+                }
+            }
+            solidIslands.Add(island);
+        }
+
+        // Create paths for the polygon collider.
+        if (solidIslands.Count > 0)
+        {
+            polygonCollider.pathCount = solidIslands.Count;
+            for (int islandI = 0; islandI < solidIslands.Count; ++islandI)
+            {
+                // We traverse island's outline and create new path points where outline has corners.
+
+                List<Vector2> island = solidIslands[islandI];
+                List<Vector2> pathPoints = new List<Vector2>();
+                Vector2 currentTile = island[0];
+                pathPoints.Add(MeshTileCornerPoint(currentTile, Corner.BottomLeft));
+                Direction direction = Direction.Right;
+                bool working = true;
+                while (working)
+                {
+                    Vector2? newPathPoint = null;
+
+                    Vector2 rightNeighbor = new Vector2(currentTile.x + 1, currentTile.y);
+                    Vector2 bottomRightNeighbor = new Vector2(currentTile.x + 1, currentTile.y - 1);
+                    Vector2 topRightNeighbor = new Vector2(currentTile.x + 1, currentTile.y + 1);
+                    Vector2 leftNeighbor = new Vector2(currentTile.x - 1, currentTile.y);
+                    Vector2 bottomLeftNeighbor = new Vector2(currentTile.x - 1, currentTile.y - 1);
+                    Vector2 topLeftNeighbor = new Vector2(currentTile.x - 1, currentTile.y + 1);
+                    Vector2 topNeighbor = new Vector2(currentTile.x, currentTile.y + 1);
+                    Vector2 bottomNeighbor = new Vector2(currentTile.x, currentTile.y - 1);
+
+                    switch (direction)
+                    {
+                        // Moving right along the bottom edge
+                        case Direction.Right:
+                            if (island.Contains(rightNeighbor))
+                            {
+                                if (island.Contains(bottomRightNeighbor))
+                                {
+                                    newPathPoint = MeshTileCornerPoint(currentTile, Corner.BottomRight);
+                                    direction = Direction.Down;
+                                    currentTile = bottomRightNeighbor;
+                                }
+                                else
+                                {
+                                    currentTile = rightNeighbor;
+                                }
+                            }
+                            else
+                            {
+                                newPathPoint = MeshTileCornerPoint(currentTile, Corner.BottomRight);
+                                direction = Direction.Up;
+                            }
+                            break;
+
+                        // Moving left along the top edge
+                        case Direction.Left:
+                            if (island.Contains(leftNeighbor))
+                            {
+                                if (island.Contains(topLeftNeighbor))
+                                {
+                                    newPathPoint = MeshTileCornerPoint(currentTile, Corner.TopLeft);
+                                    direction = Direction.Up;
+                                    currentTile = topLeftNeighbor;
+                                }
+                                else
+                                {
+                                    currentTile = leftNeighbor;
+                                }
+                            }
+                            else
+                            {
+                                newPathPoint = MeshTileCornerPoint(currentTile, Corner.TopLeft);
+                                direction = Direction.Down;
+                            }
+                            break;
+
+                        // Moving up along the right edge
+                        case Direction.Up:
+                            if (island.Contains(topNeighbor))
+                            {
+                                if (island.Contains(topRightNeighbor))
+                                {
+                                    newPathPoint = MeshTileCornerPoint(currentTile, Corner.TopRight);
+                                    direction = Direction.Right;
+                                    currentTile = topRightNeighbor;
+                                }
+                                else
+                                {
+                                    currentTile = topNeighbor;
+                                }
+                            }
+                            else
+                            {
+                                newPathPoint = MeshTileCornerPoint(currentTile, Corner.TopRight);
+                                direction = Direction.Left;
+                            }
+                            break;
+
+                        // Moving down along the left edge
+                        case Direction.Down:
+                            if (island.Contains(bottomNeighbor))
+                            {
+                                if (island.Contains(bottomLeftNeighbor))
+                                {
+                                    newPathPoint = MeshTileCornerPoint(currentTile, Corner.BottomLeft);
+                                    direction = Direction.Left;
+                                    currentTile = bottomLeftNeighbor;
+                                }
+                                else
+                                {
+                                    currentTile = bottomNeighbor;
+                                }
+                            }
+                            else
+                            {
+                                newPathPoint = MeshTileCornerPoint(currentTile, Corner.BottomLeft);
+                                direction = Direction.Right;
+                            }
+                            break;
+                    }
+
+                    if (newPathPoint != null)
+                    {
+                        if (newPathPoint == pathPoints[0])
+                        {
+                            working = false;
+                        }
+                        else
+                        {
+                            pathPoints.Add((Vector2)newPathPoint);
+                        }
+                    }
+                }
+                polygonCollider.SetPath(islandI, pathPoints.ToArray());
             }
         }
     }
