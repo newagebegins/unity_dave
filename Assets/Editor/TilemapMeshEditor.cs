@@ -21,7 +21,7 @@ public class LevelScriptEditor : Editor
         GameObject gameObject = new GameObject("TilemapMesh");
         MeshFilter meshFilter = gameObject.AddComponent<MeshFilter>();
 
-        // TODO: Maybe I should use DestroyImmediate() on the generated material when game object is deleted
+        // NOTE: Maybe I should use DestroyImmediate() on the generated material when game object is deleted
         // to prevent "leaked objects" error?
         // See http://answers.unity3d.com/questions/38960/cleaning-up-leaked-objects-in-scene-since-no-game.html
         Mesh mesh = new Mesh();
