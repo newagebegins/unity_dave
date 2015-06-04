@@ -230,6 +230,7 @@ public class LevelScriptEditor : Editor
 
                         switch (direction)
                         {
+                            // Moving right along the bottom edge
                             case Direction.Right:
                                 if (island.Contains(rightNeighbor))
                                 {
@@ -251,6 +252,7 @@ public class LevelScriptEditor : Editor
                                 }
                                 break;
 
+                            // Moving left along the top edge
                             case Direction.Left:
                                 if (island.Contains(leftNeighbor))
                                 {
@@ -272,6 +274,7 @@ public class LevelScriptEditor : Editor
                                 }
                                 break;
 
+                            // Moving up along the right edge
                             case Direction.Up:
                                 if (island.Contains(topNeighbor))
                                 {
@@ -293,6 +296,7 @@ public class LevelScriptEditor : Editor
                                 }
                                 break;
 
+                            // Moving down along the left edge
                             case Direction.Down:
                                 if (island.Contains(bottomNeighbor))
                                 {
