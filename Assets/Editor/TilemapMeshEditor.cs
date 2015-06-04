@@ -409,9 +409,10 @@ public class LevelScriptEditor : Editor
         {
             int uvI = (col + tilemapMesh.meshCols * row) * verticesPerTile;
             Vector2 uv = meshFilter.sharedMesh.uv[uvI];
-            int tileCol = (int)(uv.x / UVTileWidth);
-            int tileRow = (int)(uv.y / UVTileHeight);
-            result = (tileCol == 1 && tileRow == 0);
+            int tilesetCol = (int)(uv.x / UVTileWidth);
+            int tilesetRow = (int)(uv.y / UVTileHeight);
+            // For now we just hardcode second bottom tile in the tileset as a single solid tile
+            result = (tilesetCol == 1 && tilesetRow == 0);
         }
         return result;
     }
