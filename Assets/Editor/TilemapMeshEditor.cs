@@ -140,8 +140,19 @@ public class LevelScriptEditor : Editor
 
         if (GUILayout.Button("Generate collider"))
         {
-            GameObject gameObject = new GameObject("Collider");
-            gameObject.transform.parent = tilemapMesh.gameObject.transform;
+            const string colliderObjectName = "Collider";
+            PolygonCollider2D polygonCollider;
+            Transform colliderObject = tilemapMesh.transform.Find(colliderObjectName);
+            if (colliderObject)
+            {
+                polygonCollider = colliderObject.GetComponent<PolygonCollider2D>();
+            }
+            else
+            {
+                GameObject gameObject = new GameObject(colliderObjectName);
+                gameObject.transform.parent = tilemapMesh.transform;
+                polygonCollider = gameObject.AddComponent<PolygonCollider2D>();
+            }
 
             List<List<Vector2>> solidIslands = new List<List<Vector2>>();
             List<Vector2> unvisitedSolidTiles = new List<Vector2>();
@@ -186,7 +197,6 @@ public class LevelScriptEditor : Editor
 
             if (solidIslands.Count > 0)
             {
-                PolygonCollider2D polygonCollider = gameObject.AddComponent<PolygonCollider2D>();
                 polygonCollider.pathCount = solidIslands.Count;
                 for (int islandI = 0; islandI < solidIslands.Count; ++islandI)
                 {
