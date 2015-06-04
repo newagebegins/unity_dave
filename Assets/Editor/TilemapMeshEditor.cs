@@ -140,6 +140,9 @@ public class LevelScriptEditor : Editor
 
         if (GUILayout.Button("Generate collider"))
         {
+            // Tilemap game object has a child game object that contains one polygon collider
+            // that encompasses all solid tiles.
+            
             const string colliderObjectName = "Collider";
             PolygonCollider2D polygonCollider;
             Transform colliderObject = tilemapMesh.transform.Find(colliderObjectName);
@@ -154,7 +157,7 @@ public class LevelScriptEditor : Editor
                 polygonCollider = gameObject.AddComponent<PolygonCollider2D>();
             }
 
-            List<List<Vector2>> solidIslands = new List<List<Vector2>>();
+            // Gather all solid tiles.
             List<Vector2> unvisitedSolidTiles = new List<Vector2>();
             for (int row = 0; row < tilemapMesh.meshRows; ++row)
             {
@@ -166,6 +169,9 @@ public class LevelScriptEditor : Editor
                     }
                 }
             }
+
+            // Gather "islands" of contiguous tiles.
+            List<List<Vector2>> solidIslands = new List<List<Vector2>>();
             while (unvisitedSolidTiles.Count > 0)
             {
                 List<Vector2> island = new List<Vector2>();
@@ -195,11 +201,14 @@ public class LevelScriptEditor : Editor
                 solidIslands.Add(island);
             }
 
+            // Create paths for the polygon collider.
             if (solidIslands.Count > 0)
             {
                 polygonCollider.pathCount = solidIslands.Count;
                 for (int islandI = 0; islandI < solidIslands.Count; ++islandI)
                 {
+                    // We traverse island's outline and create new path points where outline has corners.
+
                     List<Vector2> island = solidIslands[islandI];
                     List<Vector2> pathPoints = new List<Vector2>();
                     Vector2 currentTile = island[0];
@@ -323,6 +332,8 @@ public class LevelScriptEditor : Editor
             }
         }
 
+        // Draw a tileset.
+
         float tilesetScale = 8;
         float tilesetTileWidth = textureTileWidth * tilesetScale;
         float tilesetTileHeight = textureTileHeight * tilesetScale;
@@ -406,7 +417,7 @@ public class LevelScriptEditor : Editor
         return IsSolidTile((int)tile.x, (int)tile.y);
     }
 
-    private Vector2 MeshCellPos(int col, int row, Corner corner)
+    private Vector2 MeshTileCornerPoint(int col, int row, Corner corner)
     {
         Vector2 result = new Vector2();
         switch (corner)
@@ -431,7 +442,7 @@ public class LevelScriptEditor : Editor
 
     private Vector2 MeshTileCornerPoint(Vector2 tile, Corner corner)
     {
-        return MeshCellPos((int)tile.x, (int)tile.y, corner);
+        return MeshTileCornerPoint((int)tile.x, (int)tile.y, corner);
     }
 
     private static void GenerateMeshData(int cols, int rows, out Vector3[] vertices, out int[] triangles, out Vector2 centerPos)
