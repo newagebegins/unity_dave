@@ -425,7 +425,7 @@ public class LevelScriptEditor : Editor
             return;
         }
 
-        // TODO: Assert that savedUVs is divisible by verticesPerTile
+        DebugUtils.Assert(savedUVs.Count % verticesPerTile == 0);
 
         Vector2[] newUV = meshFilter.sharedMesh.uv;
 
