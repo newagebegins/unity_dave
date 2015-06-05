@@ -350,16 +350,21 @@ public class LevelScriptEditor : Editor
             Vector2 mousePos = new Vector2(mouseRay.origin.x, mouseRay.origin.y);
             if (editorTilemapCollider.OverlapPoint(mousePos))
             {
-                // User has clicked on the mesh
+                // User has clicked on the mesh.
+                // Paint tiles using a rectangular brush of tiles selected in the tileset.
 
                 Vector2[] newUV = meshFilter.sharedMesh.uv;
 
                 int meshBaseCol = (int)((mousePos.x - editorTilemapCollider.bounds.min.x) / meshSegmentWidth);
                 int meshBaseRow = (int)((mousePos.y - editorTilemapCollider.bounds.min.y) / meshSegmentWidth);
 
-                for (int meshRow = meshBaseRow, tilesetRow = brushStartTileRow; meshRow > (meshBaseRow - BrushHeight); --meshRow, ++tilesetRow)
+                for (int meshRow = meshBaseRow, tilesetRow = brushStartTileRow;
+                    meshRow > (meshBaseRow - BrushHeight) && meshRow >= 0 && meshRow < tilemapMesh.meshRows;
+                    --meshRow, ++tilesetRow)
                 {
-                    for (int meshCol = meshBaseCol, tilesetCol = brushStartTileCol; meshCol < (meshBaseCol + BrushWidth); ++meshCol, ++tilesetCol)
+                    for (int meshCol = meshBaseCol, tilesetCol = brushStartTileCol;
+                        meshCol < (meshBaseCol + BrushWidth) && meshCol >= 0 && meshCol < tilemapMesh.meshCols;
+                        ++meshCol, ++tilesetCol)
                     {
                         int tileIndex = meshCol + meshRow * tilemapMesh.meshCols;
                         int brushTileRowConverted = TilesetRows - tilesetRow - 1; // Convert so that bottom row is zero
