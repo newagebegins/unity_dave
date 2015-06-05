@@ -476,6 +476,8 @@ public class LevelScriptEditor : Editor
         // Tilemap game object has a child game object that contains one polygon collider
         // that encompasses all solid tiles.
 
+        DeleteColliderIfExists();
+
         // Gather all solid tiles.
         List<Vector2> unvisitedSolidTiles = new List<Vector2>();
         for (int row = 0; row < tilemapMesh.meshRows; ++row)
@@ -524,7 +526,6 @@ public class LevelScriptEditor : Editor
         // Create paths for the polygon collider.
         if (solidIslands.Count > 0)
         {
-            DeleteColliderIfExists();
             GameObject gameObject = new GameObject(colliderObjectName);
             gameObject.transform.parent = tilemapMesh.transform;
             PolygonCollider2D polygonCollider = gameObject.AddComponent<PolygonCollider2D>();
