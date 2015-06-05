@@ -167,9 +167,6 @@ public class LevelScriptEditor : Editor
         tilesetRect.width = tilesetWidth;
         GUI.DrawTexture(new Rect(tilesetRect.xMin, tilesetRect.yMin, tilesetWidth, tilesetHeight), texture, ScaleMode.ScaleToFit);
 
-        Texture2D overlayTexture = new Texture2D(1, 1);
-        overlayTexture.SetPixel(0, 0, new Color(1, 1, 1, 0.5f));
-
         if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && tilesetRect.Contains(Event.current.mousePosition))
         {
             mouseStartPosition = Event.current.mousePosition;
@@ -213,9 +210,21 @@ public class LevelScriptEditor : Editor
         Handles.DrawLine(new Vector2(mouseEndPosition.x, mouseEndPosition.y), new Vector2(mouseStartPosition.x, mouseEndPosition.y));
         Handles.DrawLine(new Vector2(mouseStartPosition.x, mouseEndPosition.y), new Vector2(mouseStartPosition.x, mouseStartPosition.y));
 #endif
+        // Draw a border around the selected tiles.
+        float selectionLeft = tilesetRect.xMin + tilemapMesh.brushStartTileCol * tilesetTileWidth;
+        float selectionTop = tilesetRect.yMin + tilemapMesh.brushStartTileRow * tilesetTileHeight;
+        float selectionRight = selectionLeft + BrushWidth * tilesetTileWidth;
+        float selectionBottom = selectionTop + BrushHeight * tilesetTileHeight;
+        Handles.DrawAAPolyLine(10f,
+            new Vector3(selectionLeft, selectionBottom),
+            new Vector3(selectionRight, selectionBottom),
+            new Vector3(selectionRight, selectionTop),
+            new Vector3(selectionLeft, selectionTop),
+            new Vector3(selectionLeft, selectionBottom));
 
-        Rect overlayRect = new Rect(tilesetRect.xMin + tilemapMesh.brushStartTileCol * tilesetTileWidth, tilesetRect.yMin + tilemapMesh.brushStartTileRow * tilesetTileHeight, BrushWidth * tilesetTileWidth, BrushHeight * tilesetTileHeight);
-        GUI.DrawTexture(overlayRect, overlayTexture, ScaleMode.StretchToFill, true);
+        //Texture2D overlayTexture = new Texture2D(1, 1);
+        //overlayTexture.SetPixel(0, 0, new Color(1, 1, 1, 0.5f));
+        //GUI.DrawTexture(overlayRect, overlayTexture, ScaleMode.StretchToFill, true);
     }
 
     private int BrushWidth
