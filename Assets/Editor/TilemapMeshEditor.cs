@@ -47,8 +47,6 @@ public class LevelScriptEditor : Editor
         gameObject.transform.position = centerPos;
     }
 
-    private int selectedTileCol = 0;
-    private int selectedTileRow = 0;
     private int guiMeshCols = 0;
     private int guiMeshRows = 0;
 
@@ -60,10 +58,10 @@ public class LevelScriptEditor : Editor
     private Vector2 mouseStartPosition = new Vector2();
     private Vector2 mouseEndPosition = new Vector2();
 
-    private int startTileCol = 0;
-    private int startTileRow = 0;
-    private int endTileCol = 0;
-    private int endTileRow = 0;
+    private int brushStartTileCol = 0;
+    private int brushStartTileRow = 0;
+    private int brushEndTileCol = 0;
+    private int brushEndTileRow = 0;
 
     private void OnEnable()
     {
@@ -173,8 +171,6 @@ public class LevelScriptEditor : Editor
         if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && tilesetRect.Contains(Event.current.mousePosition))
         {
             mouseStartPosition = Event.current.mousePosition;
-            //selectedTileCol = (int)((Event.current.mousePosition.x - tilesetRect.x) / tilesetTileWidth);
-            //selectedTileRow = (int)((Event.current.mousePosition.y - tilesetRect.y) / tilesetTileHeight);
         }
 
         if ((Event.current.type == EventType.MouseDrag) ||
@@ -187,23 +183,23 @@ public class LevelScriptEditor : Editor
             int row2 = (int)((mouseEndPosition.y - tilesetRect.y) / tilesetTileHeight);
             if (col1 < col2)
             {
-                startTileCol = col1;
-                endTileCol = col2;
+                brushStartTileCol = col1;
+                brushEndTileCol = col2;
             }
             else
             {
-                startTileCol = col2;
-                endTileCol = col1;
+                brushStartTileCol = col2;
+                brushEndTileCol = col1;
             }
             if (row1 < row2)
             {
-                startTileRow = row1;
-                endTileRow = row2;
+                brushStartTileRow = row1;
+                brushEndTileRow = row2;
             }
             else
             {
-                startTileRow = row2;
-                endTileRow = row1;
+                brushStartTileRow = row2;
+                brushEndTileRow = row1;
             }
             Repaint();
         }
@@ -213,8 +209,18 @@ public class LevelScriptEditor : Editor
         Handles.DrawLine(new Vector2(mouseEndPosition.x, mouseEndPosition.y), new Vector2(mouseStartPosition.x, mouseEndPosition.y));
         Handles.DrawLine(new Vector2(mouseStartPosition.x, mouseEndPosition.y), new Vector2(mouseStartPosition.x, mouseStartPosition.y));
 
-        Rect overlayRect = new Rect(tilesetRect.xMin + startTileCol * tilesetTileWidth, tilesetRect.yMin + startTileRow * tilesetTileHeight, (endTileCol - startTileCol + 1) * tilesetTileWidth, (endTileRow - startTileRow + 1) * tilesetTileHeight);
+        Rect overlayRect = new Rect(tilesetRect.xMin + brushStartTileCol * tilesetTileWidth, tilesetRect.yMin + brushStartTileRow * tilesetTileHeight, BrushWidth * tilesetTileWidth, BrushHeight * tilesetTileHeight);
         GUI.DrawTexture(overlayRect, overlayTexture, ScaleMode.StretchToFill, true);
+    }
+
+    private int BrushWidth
+    {
+        get { return brushEndTileCol - brushStartTileCol + 1; }
+    }
+
+    private int BrushHeight
+    {
+        get { return brushEndTileRow - brushStartTileRow + 1; }
     }
 
     enum Corner
@@ -345,17 +351,26 @@ public class LevelScriptEditor : Editor
             if (editorTilemapCollider.OverlapPoint(mousePos))
             {
                 // User has clicked on the mesh
-                int col = (int)((mousePos.x - editorTilemapCollider.bounds.min.x) / meshSegmentWidth);
-                int row = (int)((mousePos.y - editorTilemapCollider.bounds.min.y) / meshSegmentWidth);
-                int tileIndex = col + row * tilemapMesh.meshCols;
 
-                int selectedTileRowConverted = TilesetRows - selectedTileRow - 1; // Convert so that bottom row is zero
                 Vector2[] newUV = meshFilter.sharedMesh.uv;
-                int vertexI = tileIndex * verticesPerTile;
-                newUV[vertexI + 0] = new Vector2(selectedTileCol * UVTileWidth, selectedTileRowConverted * UVTileHeight);
-                newUV[vertexI + 1] = new Vector2(selectedTileCol * UVTileWidth, selectedTileRowConverted * UVTileHeight + UVTileHeight);
-                newUV[vertexI + 2] = new Vector2(selectedTileCol * UVTileWidth + UVTileWidth, selectedTileRowConverted * UVTileHeight + UVTileHeight);
-                newUV[vertexI + 3] = new Vector2(selectedTileCol * UVTileWidth + UVTileWidth, selectedTileRowConverted * UVTileHeight);
+
+                int meshBaseCol = (int)((mousePos.x - editorTilemapCollider.bounds.min.x) / meshSegmentWidth);
+                int meshBaseRow = (int)((mousePos.y - editorTilemapCollider.bounds.min.y) / meshSegmentWidth);
+
+                for (int meshRow = meshBaseRow, tilesetRow = brushStartTileRow; meshRow > (meshBaseRow - BrushHeight); --meshRow, ++tilesetRow)
+                {
+                    for (int meshCol = meshBaseCol, tilesetCol = brushStartTileCol; meshCol < (meshBaseCol + BrushWidth); ++meshCol, ++tilesetCol)
+                    {
+                        int tileIndex = meshCol + meshRow * tilemapMesh.meshCols;
+                        int brushTileRowConverted = TilesetRows - tilesetRow - 1; // Convert so that bottom row is zero
+                        int vertexI = tileIndex * verticesPerTile;
+                        newUV[vertexI + 0] = new Vector2(tilesetCol * UVTileWidth, brushTileRowConverted * UVTileHeight);
+                        newUV[vertexI + 1] = new Vector2(tilesetCol * UVTileWidth, brushTileRowConverted * UVTileHeight + UVTileHeight);
+                        newUV[vertexI + 2] = new Vector2(tilesetCol * UVTileWidth + UVTileWidth, brushTileRowConverted * UVTileHeight + UVTileHeight);
+                        newUV[vertexI + 3] = new Vector2(tilesetCol * UVTileWidth + UVTileWidth, brushTileRowConverted * UVTileHeight);
+                    }
+                }
+
                 meshFilter.sharedMesh.uv = newUV;
 
                 int controlId = GUIUtility.GetControlID(FocusType.Passive);
