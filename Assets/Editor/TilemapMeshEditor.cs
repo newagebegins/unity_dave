@@ -57,6 +57,14 @@ public class LevelScriptEditor : Editor
     private MeshFilter meshFilter;
     private BoxCollider2D editorTilemapCollider;
 
+    private Vector2 mouseStartPosition = new Vector2();
+    private Vector2 mouseEndPosition = new Vector2();
+
+    private int startTileCol = 0;
+    private int startTileRow = 0;
+    private int endTileCol = 0;
+    private int endTileRow = 0;
+
     private void OnEnable()
     {
         tilemapMesh = (TilemapMesh)target;
@@ -155,24 +163,58 @@ public class LevelScriptEditor : Editor
 
         GUILayout.Space(8);
         GUILayout.Space(tilesetHeight);
-        Rect tilesetRect = new Rect(GUILayoutUtility.GetLastRect());
+        Rect tilesetRect = GUILayoutUtility.GetLastRect();
         tilesetRect.width = tilesetWidth;
         GUI.DrawTexture(new Rect(tilesetRect.xMin, tilesetRect.yMin, tilesetWidth, tilesetHeight), texture, ScaleMode.ScaleToFit);
 
         Texture2D overlayTexture = new Texture2D(1, 1);
         overlayTexture.SetPixel(0, 0, new Color(1, 1, 1, 0.5f));
 
-        // Can draw lines like this:
-        // Handles.DrawLine(new Vector3(lastRect.x, lastRect.y, 0), new Vector3(lastRect.x + 100, lastRect.y + 100, 0));
-        
         if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && tilesetRect.Contains(Event.current.mousePosition))
         {
-            selectedTileCol = (int)((Event.current.mousePosition.x - tilesetRect.x) / tilesetTileWidth);
-            selectedTileRow = (int)((Event.current.mousePosition.y - tilesetRect.y) / tilesetTileHeight);
+            mouseStartPosition = Event.current.mousePosition;
+            //selectedTileCol = (int)((Event.current.mousePosition.x - tilesetRect.x) / tilesetTileWidth);
+            //selectedTileRow = (int)((Event.current.mousePosition.y - tilesetRect.y) / tilesetTileHeight);
+        }
+
+        if ((Event.current.type == EventType.MouseDrag) ||
+            (Event.current.type == EventType.MouseUp && Event.current.button == 0 && tilesetRect.Contains(Event.current.mousePosition)))
+        {
+            mouseEndPosition = Event.current.mousePosition;
+            int col1 = (int)((mouseStartPosition.x - tilesetRect.x) / tilesetTileWidth);
+            int row1 = (int)((mouseStartPosition.y - tilesetRect.y) / tilesetTileHeight);
+            int col2 = (int)((mouseEndPosition.x - tilesetRect.x) / tilesetTileWidth);
+            int row2 = (int)((mouseEndPosition.y - tilesetRect.y) / tilesetTileHeight);
+            if (col1 < col2)
+            {
+                startTileCol = col1;
+                endTileCol = col2;
+            }
+            else
+            {
+                startTileCol = col2;
+                endTileCol = col1;
+            }
+            if (row1 < row2)
+            {
+                startTileRow = row1;
+                endTileRow = row2;
+            }
+            else
+            {
+                startTileRow = row2;
+                endTileRow = row1;
+            }
             Repaint();
         }
-        
-        GUI.DrawTexture(new Rect(tilesetRect.xMin + selectedTileCol*tilesetTileWidth, tilesetRect.yMin + selectedTileRow*tilesetTileHeight, tilesetTileWidth, tilesetTileHeight), overlayTexture, ScaleMode.ScaleToFit, true);
+
+        Handles.DrawLine(new Vector2(mouseStartPosition.x, mouseStartPosition.y), new Vector2(mouseEndPosition.x, mouseStartPosition.y));
+        Handles.DrawLine(new Vector2(mouseEndPosition.x, mouseStartPosition.y), new Vector2(mouseEndPosition.x, mouseEndPosition.y));
+        Handles.DrawLine(new Vector2(mouseEndPosition.x, mouseEndPosition.y), new Vector2(mouseStartPosition.x, mouseEndPosition.y));
+        Handles.DrawLine(new Vector2(mouseStartPosition.x, mouseEndPosition.y), new Vector2(mouseStartPosition.x, mouseStartPosition.y));
+
+        Rect overlayRect = new Rect(tilesetRect.xMin + startTileCol * tilesetTileWidth, tilesetRect.yMin + startTileRow * tilesetTileHeight, (endTileCol - startTileCol + 1) * tilesetTileWidth, (endTileRow - startTileRow + 1) * tilesetTileHeight);
+        GUI.DrawTexture(overlayRect, overlayTexture, ScaleMode.StretchToFill, true);
     }
 
     enum Corner
