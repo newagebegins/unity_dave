@@ -6,6 +6,7 @@ using UnityEditor;
 [CustomEditor(typeof(TilemapMesh))]
 public class LevelScriptEditor : Editor
 {
+    private const string colliderObjectName = "Collider";
     private const float meshSegmentWidth = 1f;
     private const float meshSegmentHeight = 1f;
     private const float textureTileWidth = 8;
@@ -149,6 +150,12 @@ public class LevelScriptEditor : Editor
         if (GUILayout.Button("Generate Collider"))
         {
             GenerateCollider();
+        }
+
+        if (GUILayout.Button("Clear"))
+        {
+            meshFilter.sharedMesh.uv = new Vector2[meshFilter.sharedMesh.uv.Length]; // Reset UVs to (0, 0)
+            DeleteColliderIfExists();
         }
 
         // Draw a tileset.
@@ -438,14 +445,7 @@ public class LevelScriptEditor : Editor
         // Create paths for the polygon collider.
         if (solidIslands.Count > 0)
         {
-            const string colliderObjectName = "Collider";
-
-            Transform colliderObject = tilemapMesh.transform.Find(colliderObjectName);
-            if (colliderObject)
-            {
-                DestroyImmediate(colliderObject.gameObject);
-            }
-
+            DeleteColliderIfExists();
             GameObject gameObject = new GameObject(colliderObjectName);
             gameObject.transform.parent = tilemapMesh.transform;
             PolygonCollider2D polygonCollider = gameObject.AddComponent<PolygonCollider2D>();
@@ -579,6 +579,15 @@ public class LevelScriptEditor : Editor
                 }
                 polygonCollider.SetPath(islandI, pathPoints.ToArray());
             }
+        }
+    }
+
+    private void DeleteColliderIfExists()
+    {
+        Transform colliderObject = tilemapMesh.transform.Find(colliderObjectName);
+        if (colliderObject)
+        {
+            DestroyImmediate(colliderObject.gameObject);
         }
     }
 }
