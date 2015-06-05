@@ -344,8 +344,94 @@ public class LevelScriptEditor : Editor
         }
     }
 
+    private List<Vector2> savedUVs = new List<Vector2>();
+    private int savedMeshCol = 0;
+    private int savedMeshRow = 0;
+
     private void OnSceneGUI()
     {
+        if (Event.current.type == EventType.MouseMove)
+        {
+            // - When mouse is over the mesh
+            //   - store cell where the mouse is
+            //   - save UVs of the tiles that will be overwritten.
+            //   - Write brush UVs into the mesh.
+            // - When mouse moves to the other mesh cell
+            //   - restore overwritten UVs
+            //   - start over
+
+            Ray mouseRay = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
+            Vector2 mousePos = new Vector2(mouseRay.origin.x, mouseRay.origin.y);
+            
+            if (savedUVs.Count > 0)
+            {
+                Vector2[] newUV = meshFilter.sharedMesh.uv;
+
+                int meshBaseCol = savedMeshCol;
+                int meshBaseRow = savedMeshRow;
+
+                for (int meshRow = meshBaseRow;
+                    meshRow > (meshBaseRow - BrushHeight) && meshRow >= 0 && meshRow < tilemapMesh.meshRows;
+                    --meshRow)
+                {
+                    for (int meshCol = meshBaseCol;
+                        meshCol < (meshBaseCol + BrushWidth) && meshCol >= 0 && meshCol < tilemapMesh.meshCols;
+                        ++meshCol)
+                    {
+                        int tileIndex = meshCol + meshRow * tilemapMesh.meshCols;
+                        int vertexI = tileIndex * verticesPerTile;
+
+                        newUV[vertexI + 0] = savedUVs[0];
+                        newUV[vertexI + 1] = savedUVs[1];
+                        newUV[vertexI + 2] = savedUVs[2];
+                        newUV[vertexI + 3] = savedUVs[3];
+                        
+                        savedUVs.RemoveRange(0, 4);
+                    }
+                }
+
+                meshFilter.sharedMesh.uv = newUV;
+            }
+            
+            if (editorTilemapCollider.OverlapPoint(mousePos))
+            {
+                Vector2[] newUV = meshFilter.sharedMesh.uv;
+
+                int meshBaseCol = (int)((mousePos.x - editorTilemapCollider.bounds.min.x) / meshSegmentWidth);
+                int meshBaseRow = (int)((mousePos.y - editorTilemapCollider.bounds.min.y) / meshSegmentWidth);
+
+                savedMeshCol = meshBaseCol;
+                savedMeshRow = meshBaseRow;
+                savedUVs.Clear();
+
+                for (int meshRow = meshBaseRow, tilesetRow = tilemapMesh.brushStartTileRow;
+                    meshRow > (meshBaseRow - BrushHeight) && meshRow >= 0 && meshRow < tilemapMesh.meshRows;
+                    --meshRow, ++tilesetRow)
+                {
+                    for (int meshCol = meshBaseCol, tilesetCol = tilemapMesh.brushStartTileCol;
+                        meshCol < (meshBaseCol + BrushWidth) && meshCol >= 0 && meshCol < tilemapMesh.meshCols;
+                        ++meshCol, ++tilesetCol)
+                    {
+                        int tileIndex = meshCol + meshRow * tilemapMesh.meshCols;
+                        int brushTileRowConverted = TilesetRows - tilesetRow - 1; // Convert so that bottom row is zero
+                        int vertexI = tileIndex * verticesPerTile;
+                        
+                        savedUVs.Add(newUV[vertexI + 0]);
+                        savedUVs.Add(newUV[vertexI + 1]);
+                        savedUVs.Add(newUV[vertexI + 2]);
+                        savedUVs.Add(newUV[vertexI + 3]);
+                        
+                        newUV[vertexI + 0] = new Vector2(tilesetCol * UVTileWidth, brushTileRowConverted * UVTileHeight);
+                        newUV[vertexI + 1] = new Vector2(tilesetCol * UVTileWidth, brushTileRowConverted * UVTileHeight + UVTileHeight);
+                        newUV[vertexI + 2] = new Vector2(tilesetCol * UVTileWidth + UVTileWidth, brushTileRowConverted * UVTileHeight + UVTileHeight);
+                        newUV[vertexI + 3] = new Vector2(tilesetCol * UVTileWidth + UVTileWidth, brushTileRowConverted * UVTileHeight);
+                    }
+                }
+
+                meshFilter.sharedMesh.uv = newUV;
+            }
+        }
+        
         if ((Event.current.type == EventType.MouseDown || Event.current.type == EventType.MouseDrag) && Event.current.button == 0)
         {
             Ray mouseRay = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
@@ -354,6 +440,8 @@ public class LevelScriptEditor : Editor
             {
                 // User has clicked on the mesh.
                 // Paint tiles using a rectangular brush of tiles selected in the tileset.
+
+                savedUVs.Clear();
 
                 Vector2[] newUV = meshFilter.sharedMesh.uv;
 
