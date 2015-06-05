@@ -206,10 +206,13 @@ public class LevelScriptEditor : Editor
             Repaint();
         }
 
+#if false
+        // Draw selection rectangle
         Handles.DrawLine(new Vector2(mouseStartPosition.x, mouseStartPosition.y), new Vector2(mouseEndPosition.x, mouseStartPosition.y));
         Handles.DrawLine(new Vector2(mouseEndPosition.x, mouseStartPosition.y), new Vector2(mouseEndPosition.x, mouseEndPosition.y));
         Handles.DrawLine(new Vector2(mouseEndPosition.x, mouseEndPosition.y), new Vector2(mouseStartPosition.x, mouseEndPosition.y));
         Handles.DrawLine(new Vector2(mouseStartPosition.x, mouseEndPosition.y), new Vector2(mouseStartPosition.x, mouseStartPosition.y));
+#endif
 
         Rect overlayRect = new Rect(tilesetRect.xMin + tilemapMesh.brushStartTileCol * tilesetTileWidth, tilesetRect.yMin + tilemapMesh.brushStartTileRow * tilesetTileHeight, BrushWidth * tilesetTileWidth, BrushHeight * tilesetTileHeight);
         GUI.DrawTexture(overlayRect, overlayTexture, ScaleMode.StretchToFill, true);
