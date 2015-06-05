@@ -59,11 +59,6 @@ public class LevelScriptEditor : Editor
     private Vector2 mouseStartPosition = new Vector2();
     private Vector2 mouseEndPosition = new Vector2();
 
-    private int brushStartTileCol = 0;
-    private int brushStartTileRow = 0;
-    private int brushEndTileCol = 0;
-    private int brushEndTileRow = 0;
-
     private void OnEnable()
     {
         tilemapMesh = (TilemapMesh)target;
@@ -190,23 +185,23 @@ public class LevelScriptEditor : Editor
             int row2 = (int)((mouseEndPosition.y - tilesetRect.y) / tilesetTileHeight);
             if (col1 < col2)
             {
-                brushStartTileCol = col1;
-                brushEndTileCol = col2;
+                tilemapMesh.brushStartTileCol = col1;
+                tilemapMesh.brushEndTileCol = col2;
             }
             else
             {
-                brushStartTileCol = col2;
-                brushEndTileCol = col1;
+                tilemapMesh.brushStartTileCol = col2;
+                tilemapMesh.brushEndTileCol = col1;
             }
             if (row1 < row2)
             {
-                brushStartTileRow = row1;
-                brushEndTileRow = row2;
+                tilemapMesh.brushStartTileRow = row1;
+                tilemapMesh.brushEndTileRow = row2;
             }
             else
             {
-                brushStartTileRow = row2;
-                brushEndTileRow = row1;
+                tilemapMesh.brushStartTileRow = row2;
+                tilemapMesh.brushEndTileRow = row1;
             }
             Repaint();
         }
@@ -216,18 +211,18 @@ public class LevelScriptEditor : Editor
         Handles.DrawLine(new Vector2(mouseEndPosition.x, mouseEndPosition.y), new Vector2(mouseStartPosition.x, mouseEndPosition.y));
         Handles.DrawLine(new Vector2(mouseStartPosition.x, mouseEndPosition.y), new Vector2(mouseStartPosition.x, mouseStartPosition.y));
 
-        Rect overlayRect = new Rect(tilesetRect.xMin + brushStartTileCol * tilesetTileWidth, tilesetRect.yMin + brushStartTileRow * tilesetTileHeight, BrushWidth * tilesetTileWidth, BrushHeight * tilesetTileHeight);
+        Rect overlayRect = new Rect(tilesetRect.xMin + tilemapMesh.brushStartTileCol * tilesetTileWidth, tilesetRect.yMin + tilemapMesh.brushStartTileRow * tilesetTileHeight, BrushWidth * tilesetTileWidth, BrushHeight * tilesetTileHeight);
         GUI.DrawTexture(overlayRect, overlayTexture, ScaleMode.StretchToFill, true);
     }
 
     private int BrushWidth
     {
-        get { return brushEndTileCol - brushStartTileCol + 1; }
+        get { return tilemapMesh.brushEndTileCol - tilemapMesh.brushStartTileCol + 1; }
     }
 
     private int BrushHeight
     {
-        get { return brushEndTileRow - brushStartTileRow + 1; }
+        get { return tilemapMesh.brushEndTileRow - tilemapMesh.brushStartTileRow + 1; }
     }
 
     enum Corner
@@ -365,11 +360,11 @@ public class LevelScriptEditor : Editor
                 int meshBaseCol = (int)((mousePos.x - editorTilemapCollider.bounds.min.x) / meshSegmentWidth);
                 int meshBaseRow = (int)((mousePos.y - editorTilemapCollider.bounds.min.y) / meshSegmentWidth);
 
-                for (int meshRow = meshBaseRow, tilesetRow = brushStartTileRow;
+                for (int meshRow = meshBaseRow, tilesetRow = tilemapMesh.brushStartTileRow;
                     meshRow > (meshBaseRow - BrushHeight) && meshRow >= 0 && meshRow < tilemapMesh.meshRows;
                     --meshRow, ++tilesetRow)
                 {
-                    for (int meshCol = meshBaseCol, tilesetCol = brushStartTileCol;
+                    for (int meshCol = meshBaseCol, tilesetCol = tilemapMesh.brushStartTileCol;
                         meshCol < (meshBaseCol + BrushWidth) && meshCol >= 0 && meshCol < tilemapMesh.meshCols;
                         ++meshCol, ++tilesetCol)
                     {
