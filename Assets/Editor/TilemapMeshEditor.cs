@@ -200,6 +200,12 @@ public class LevelScriptEditor : Editor
                 tilemapMesh.brushStartTileRow = row2;
                 tilemapMesh.brushEndTileRow = row1;
             }
+
+            tilemapMesh.brushStartTileCol = Mathf.Clamp(tilemapMesh.brushStartTileCol, 0, TilesetCols - 1);
+            tilemapMesh.brushStartTileRow = Mathf.Clamp(tilemapMesh.brushStartTileRow, 0, TilesetRows - 1);
+            tilemapMesh.brushEndTileCol = Mathf.Clamp(tilemapMesh.brushEndTileCol, 0, TilesetCols - 1);
+            tilemapMesh.brushEndTileRow = Mathf.Clamp(tilemapMesh.brushEndTileRow, 0, TilesetRows - 1);
+
             Repaint();
         }
 
