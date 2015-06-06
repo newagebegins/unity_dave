@@ -203,6 +203,7 @@ public class LevelScriptEditor : Editor
             if ((Event.current.type == EventType.MouseDrag) ||
                 (Event.current.type == EventType.MouseUp && Event.current.button == 0 && tilesetRect.Contains(Event.current.mousePosition)))
             {
+                // Need to restore the tiles before we change the brush.
                 RestoreTiles();
 
                 mouseEndPosition = Event.current.mousePosition;
@@ -249,8 +250,8 @@ public class LevelScriptEditor : Editor
             // Draw a border around the selected tiles.
             float selectionLeft = tilesetRect.xMin + tilemapMesh.brushStartTileCol * tilesetTileWidth;
             float selectionTop = tilesetRect.yMin + tilemapMesh.brushStartTileRow * tilesetTileHeight;
-            float selectionRight = selectionLeft + BrushWidth * tilesetTileWidth;
-            float selectionBottom = selectionTop + BrushHeight * tilesetTileHeight;
+            float selectionRight = selectionLeft + tilemapMesh.BrushWidth * tilesetTileWidth;
+            float selectionBottom = selectionTop + tilemapMesh.BrushHeight * tilesetTileHeight;
             Handles.DrawAAPolyLine(10f,
                 new Vector3(selectionLeft, selectionBottom),
                 new Vector3(selectionRight, selectionBottom),
@@ -258,16 +259,6 @@ public class LevelScriptEditor : Editor
                 new Vector3(selectionLeft, selectionTop),
                 new Vector3(selectionLeft, selectionBottom));
         }
-    }
-
-    private int BrushWidth
-    {
-        get { return tilemapMesh.brushEndTileCol - tilemapMesh.brushStartTileCol + 1; }
-    }
-
-    private int BrushHeight
-    {
-        get { return tilemapMesh.brushEndTileRow - tilemapMesh.brushStartTileRow + 1; }
     }
 
     enum Corner
@@ -429,11 +420,11 @@ public class LevelScriptEditor : Editor
         tilemapMesh.savedUVs.Clear();
 
         for (int meshRow = meshBaseRow, tilesetRow = tilemapMesh.brushStartTileRow;
-            meshRow > (meshBaseRow - BrushHeight) && meshRow >= 0 && meshRow < tilemapMesh.meshRows;
+            meshRow > (meshBaseRow - tilemapMesh.BrushHeight) && meshRow >= 0 && meshRow < tilemapMesh.meshRows;
             --meshRow, ++tilesetRow)
         {
             for (int meshCol = meshBaseCol, tilesetCol = tilemapMesh.brushStartTileCol;
-                meshCol < (meshBaseCol + BrushWidth) && meshCol >= 0 && meshCol < tilemapMesh.meshCols;
+                meshCol < (meshBaseCol + tilemapMesh.BrushWidth) && meshCol >= 0 && meshCol < tilemapMesh.meshCols;
                 ++meshCol, ++tilesetCol)
             {
                 int tileIndex = meshCol + meshRow * tilemapMesh.meshCols;
@@ -473,11 +464,11 @@ public class LevelScriptEditor : Editor
         int meshBaseRow = tilemapMesh.savedMeshRow;
 
         for (int meshRow = meshBaseRow;
-            meshRow > (meshBaseRow - BrushHeight) && meshRow >= 0 && meshRow < tilemapMesh.meshRows;
+            meshRow > (meshBaseRow - tilemapMesh.BrushHeight) && meshRow >= 0 && meshRow < tilemapMesh.meshRows;
             --meshRow)
         {
             for (int meshCol = meshBaseCol;
-                meshCol < (meshBaseCol + BrushWidth) && meshCol >= 0 && meshCol < tilemapMesh.meshCols;
+                meshCol < (meshBaseCol + tilemapMesh.BrushWidth) && meshCol >= 0 && meshCol < tilemapMesh.meshCols;
                 ++meshCol)
             {
                 int tileIndex = meshCol + meshRow * tilemapMesh.meshCols;

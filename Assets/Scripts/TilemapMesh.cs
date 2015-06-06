@@ -19,4 +19,14 @@ public class TilemapMesh : MonoBehaviour
     public List<Vector2> savedUVs = new List<Vector2>();
     public int savedMeshCol = 0;
     public int savedMeshRow = 0;
+
+    public int BrushWidth
+    {
+        get { return brushEndTileCol - brushStartTileCol + 1; }
+    }
+
+    public int BrushHeight
+    {
+        get { return brushEndTileRow - brushStartTileRow + 1; }
+    }
 }
