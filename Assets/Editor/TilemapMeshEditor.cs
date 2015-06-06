@@ -51,6 +51,7 @@ public class LevelScriptEditor : Editor
         
         MeshRenderer renderer = gameObject.AddComponent<MeshRenderer>();
         Material material = new Material(Shader.Find("Sprites/Default"));
+        material.SetFloat("PixelSnap", 1);
         renderer.material = material;
         
         gameObject.AddComponent<TilemapMesh>();
@@ -175,7 +176,7 @@ public class LevelScriptEditor : Editor
         {
             // Draw a tileset.
 
-            float tilesetScale = 8;
+            float tilesetScale = 4;
             float tilesetTileWidth = textureTileWidth * tilesetScale;
             float tilesetTileHeight = textureTileHeight * tilesetScale;
             float tilesetWidth = texture.width * tilesetScale;
@@ -402,7 +403,7 @@ public class LevelScriptEditor : Editor
             // Prevent other instruments from gaining focus while painting
             int controlId = GUIUtility.GetControlID(FocusType.Passive);
             GUIUtility.hotControl = controlId;
-            Event.current.Use();
+            //Event.current.Use();
         }
     }
 
