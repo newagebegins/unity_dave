@@ -21,10 +21,7 @@ public class LevelScriptEditor : Editor
     {
         GameObject gameObject = new GameObject("TilemapMesh");
         MeshFilter meshFilter = gameObject.AddComponent<MeshFilter>();
-
-        // NOTE: Maybe I should use DestroyImmediate() on the generated material when game object is deleted
-        // to prevent "leaked objects" error?
-        // See http://answers.unity3d.com/questions/38960/cleaning-up-leaked-objects-in-scene-since-no-game.html
+        
         Mesh mesh = new Mesh();
         mesh.name = "TilemapMesh";
         Vector3[] vertices;
@@ -227,10 +224,6 @@ public class LevelScriptEditor : Editor
             new Vector3(selectionRight, selectionTop),
             new Vector3(selectionLeft, selectionTop),
             new Vector3(selectionLeft, selectionBottom));
-
-        //Texture2D overlayTexture = new Texture2D(1, 1);
-        //overlayTexture.SetPixel(0, 0, new Color(1, 1, 1, 0.5f));
-        //GUI.DrawTexture(overlayRect, overlayTexture, ScaleMode.StretchToFill, true);
     }
 
     private int BrushWidth
