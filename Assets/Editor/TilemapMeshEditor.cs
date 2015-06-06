@@ -101,6 +101,13 @@ public class LevelScriptEditor : Editor
             tilemapMesh.textureWidth = texture.width;
             tilemapMesh.textureHeight = texture.height;
         }
+
+        RestoreTiles();
+    }
+
+    private void OnDisable()
+    {
+        RestoreTiles();
     }
 
     public override void OnInspectorGUI()
@@ -196,6 +203,8 @@ public class LevelScriptEditor : Editor
             if ((Event.current.type == EventType.MouseDrag) ||
                 (Event.current.type == EventType.MouseUp && Event.current.button == 0 && tilesetRect.Contains(Event.current.mousePosition)))
             {
+                RestoreTiles();
+
                 mouseEndPosition = Event.current.mousePosition;
                 int col1 = (int)((mouseStartPosition.x - tilesetRect.x) / tilesetTileWidth);
                 int row1 = (int)((mouseStartPosition.y - tilesetRect.y) / tilesetTileHeight);
@@ -407,11 +416,6 @@ public class LevelScriptEditor : Editor
         }
     }
 
-    // Data that is saved when previewing the tile brush in the scene view to be restored later.
-    private List<Vector2> savedUVs = new List<Vector2>();
-    private int savedMeshCol = 0;
-    private int savedMeshRow = 0;
-
     // Paint tiles using a rectangular brush of tiles selected in the tileset.
     private void PaintTiles(Vector2 mousePos, bool saveUVs)
     {
@@ -420,9 +424,9 @@ public class LevelScriptEditor : Editor
         int meshBaseCol = (int)((mousePos.x - editorTilemapCollider.bounds.min.x) / meshSegmentWidth);
         int meshBaseRow = (int)((mousePos.y - editorTilemapCollider.bounds.min.y) / meshSegmentWidth);
 
-        savedMeshCol = meshBaseCol;
-        savedMeshRow = meshBaseRow;
-        savedUVs.Clear();
+        tilemapMesh.savedMeshCol = meshBaseCol;
+        tilemapMesh.savedMeshRow = meshBaseRow;
+        tilemapMesh.savedUVs.Clear();
 
         for (int meshRow = meshBaseRow, tilesetRow = tilemapMesh.brushStartTileRow;
             meshRow > (meshBaseRow - BrushHeight) && meshRow >= 0 && meshRow < tilemapMesh.meshRows;
@@ -438,10 +442,10 @@ public class LevelScriptEditor : Editor
 
                 if (saveUVs)
                 {
-                    savedUVs.Add(newUV[vertexI + 0]);
-                    savedUVs.Add(newUV[vertexI + 1]);
-                    savedUVs.Add(newUV[vertexI + 2]);
-                    savedUVs.Add(newUV[vertexI + 3]);
+                    tilemapMesh.savedUVs.Add(newUV[vertexI + 0]);
+                    tilemapMesh.savedUVs.Add(newUV[vertexI + 1]);
+                    tilemapMesh.savedUVs.Add(newUV[vertexI + 2]);
+                    tilemapMesh.savedUVs.Add(newUV[vertexI + 3]);
                 }
 
                 newUV[vertexI + 0] = new Vector2(tilesetCol * UVTileWidth, brushTileRowConverted * UVTileHeight);
@@ -456,17 +460,17 @@ public class LevelScriptEditor : Editor
 
     private void RestoreTiles()
     {
-        if (savedUVs.Count <= 0)
+        if (tilemapMesh.savedUVs.Count <= 0)
         {
             return;
         }
 
-        DebugUtils.Assert(savedUVs.Count % verticesPerTile == 0);
+        DebugUtils.Assert(tilemapMesh.savedUVs.Count % verticesPerTile == 0);
 
         Vector2[] newUV = meshFilter.sharedMesh.uv;
 
-        int meshBaseCol = savedMeshCol;
-        int meshBaseRow = savedMeshRow;
+        int meshBaseCol = tilemapMesh.savedMeshCol;
+        int meshBaseRow = tilemapMesh.savedMeshRow;
 
         for (int meshRow = meshBaseRow;
             meshRow > (meshBaseRow - BrushHeight) && meshRow >= 0 && meshRow < tilemapMesh.meshRows;
@@ -480,9 +484,9 @@ public class LevelScriptEditor : Editor
                 int vertexI = tileIndex * verticesPerTile;
                 for (int i = 0; i < verticesPerTile; ++i)
                 {
-                    newUV[vertexI + i] = savedUVs[i];
+                    newUV[vertexI + i] = tilemapMesh.savedUVs[i];
                 }
-                savedUVs.RemoveRange(0, verticesPerTile);
+                tilemapMesh.savedUVs.RemoveRange(0, verticesPerTile);
             }
         }
 

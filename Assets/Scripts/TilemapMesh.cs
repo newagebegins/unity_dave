@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class TilemapMesh : MonoBehaviour
 {
@@ -13,4 +14,9 @@ public class TilemapMesh : MonoBehaviour
     public int brushStartTileRow = 0;
     public int brushEndTileCol = 0;
     public int brushEndTileRow = 0;
+
+    // Data that is saved when previewing the tile brush in the scene view to be restored later.
+    public List<Vector2> savedUVs = new List<Vector2>();
+    public int savedMeshCol = 0;
+    public int savedMeshRow = 0;
 }
