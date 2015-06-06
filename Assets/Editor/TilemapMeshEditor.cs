@@ -83,7 +83,8 @@ public class LevelScriptEditor : Editor
         if ((tilemapMesh.textureWidth > 0 && tilemapMesh.textureHeight > 0) &&
             (texture.width != tilemapMesh.textureWidth || texture.height != tilemapMesh.textureHeight))
         {
-            // Recalculate mesh UVs
+            // Recalculate mesh UVs.
+            // We assume that the image expands down and right.
             Vector2[] newUV = meshFilter.sharedMesh.uv;
             for (int i = 0; i < newUV.Length; ++i)
             {
