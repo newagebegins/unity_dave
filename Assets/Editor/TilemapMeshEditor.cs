@@ -15,6 +15,10 @@ public class LevelScriptEditor : Editor
     private const int trianglesPerTile = 2;
     private const int verticesPerTriangle = 3;
     private const int triangleIndicesPerTile = trianglesPerTile * verticesPerTriangle;
+    
+    // UV coordinates of the empty point in the texture (left top corner)
+    private const float emptyU = 0;
+    private const float emptyV = 1;
 
     [MenuItem("My Tools/Create Mesh")]
     private static void CreateMesh()
@@ -24,6 +28,7 @@ public class LevelScriptEditor : Editor
         
         Mesh mesh = new Mesh();
         mesh.name = "TilemapMesh";
+        
         Vector3[] vertices;
         int[] triangles;
         Vector2 centerPos;
@@ -32,14 +37,22 @@ public class LevelScriptEditor : Editor
         GenerateMeshData(meshCols, meshRows, out vertices, out triangles, out centerPos);
         mesh.vertices = vertices;
         mesh.triangles = triangles;
-        int vertexCount = meshRows * meshCols * verticesPerTile;
-        mesh.uv = new Vector2[vertexCount];
-        mesh.RecalculateNormals();
         
+        int vertexCount = meshRows * meshCols * verticesPerTile;
+        Vector2[] uv = new Vector2[vertexCount];
+        for (int i = 0; i < uv.Length; ++i)
+        {
+            uv[i].Set(emptyU, emptyV);
+        }
+        mesh.uv = uv;
+        
+        mesh.RecalculateNormals();
         meshFilter.mesh = mesh;
+        
         MeshRenderer renderer = gameObject.AddComponent<MeshRenderer>();
         Material material = AssetDatabase.LoadAssetAtPath("Assets/Materials/test.mat", typeof(Material)) as Material;
         renderer.material = material;
+        
         gameObject.AddComponent<TilemapMesh>();
         gameObject.AddComponent<BoxCollider2D>();
         gameObject.transform.position = centerPos;
@@ -74,9 +87,9 @@ public class LevelScriptEditor : Editor
             Vector2[] newUV = meshFilter.sharedMesh.uv;
             for (int i = 0; i < newUV.Length; ++i)
             {
-                float kX = (float)tilemapMesh.textureWidth / (float)texture.width;
-                float kY = (float)tilemapMesh.textureHeight / (float)texture.height;
-                newUV[i] = new Vector2(kX * newUV[i].x, kY * newUV[i].y);
+                float newU = newUV[i].x * ((float)tilemapMesh.textureWidth / (float)texture.width);
+                float newV = 1 - (1 - newUV[i].y) * ((float)tilemapMesh.textureHeight / (float)texture.height);
+                newUV[i].Set(newU, newV);
             }
             meshFilter.sharedMesh.uv = newUV;
         }
@@ -108,6 +121,10 @@ public class LevelScriptEditor : Editor
             // Copy UV data.
             int vertexCount = guiMeshCols * guiMeshRows * verticesPerTile;
             Vector2[] newUV = new Vector2[vertexCount];
+            for (int i = 0; i < newUV.Length; ++i)
+            {
+                newUV[i].Set(emptyU, emptyV);
+            }
             int minCols = Mathf.Min(guiMeshCols, tilemapMesh.meshCols);
             int minRows = Mathf.Min(guiMeshRows, tilemapMesh.meshRows);
             for (int row = 0; row < minRows; ++row)
