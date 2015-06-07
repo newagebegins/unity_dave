@@ -87,6 +87,65 @@ NavMeshSettings:
     cellSize: .166666672
     manualCellSize: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &129507477
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 129507479}
+  - 60: {fileID: 129507478}
+  m_Layer: 0
+  m_Name: Collider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!60 &129507478
+PolygonCollider2D:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 129507477}
+  m_Enabled: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_Offset: {x: 0, y: 0}
+  m_Points:
+    m_Paths:
+    - - {x: 0, y: 0}
+      - {x: 35, y: 0}
+      - {x: 35, y: 3}
+      - {x: 12, y: 3}
+      - {x: 12, y: 2}
+      - {x: 0, y: 2}
+    - - {x: 14, y: 5}
+      - {x: 15, y: 5}
+      - {x: 15, y: 8}
+      - {x: 28, y: 8}
+      - {x: 28, y: 9}
+      - {x: 15, y: 9}
+      - {x: 15, y: 14}
+      - {x: 14, y: 14}
+    - - {x: 32, y: 8}
+      - {x: 35, y: 8}
+      - {x: 35, y: 9}
+      - {x: 32, y: 9}
+--- !u!4 &129507479
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 129507477}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -32, y: -32, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1163590629}
+  m_RootOrder: 0
 --- !u!1 &365623930
 GameObject:
   m_ObjectHideFlags: 0
@@ -346,13 +405,13 @@ MonoBehaviour:
   meshRows: 64
   textureWidth: 64
   textureHeight: 64
-  brushStartTileCol: 3
+  brushStartTileCol: 6
   brushStartTileRow: 0
-  brushEndTileCol: 4
-  brushEndTileRow: 1
+  brushEndTileCol: 6
+  brushEndTileRow: 0
   savedUVs: []
-  savedMeshCol: 50
-  savedMeshRow: 5
+  savedMeshCol: 41
+  savedMeshRow: 1
 --- !u!23 &1163590627
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -393,6 +452,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 32, y: 32, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
+  m_Children:
+  - {fileID: 129507479}
   m_Father: {fileID: 0}
   m_RootOrder: 1

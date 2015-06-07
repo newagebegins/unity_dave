@@ -297,19 +297,33 @@ public class LevelScriptEditor : Editor
         get { return 1.0f / (float)TilesetRows; }
     }
 
-    private bool IsSolidTile(int col, int row)
+    // Coordinates (column, row) of the solid tiles in the tileset.
+    // (0, 0) is the left top tile of the tileset.
+    private Vector2[] solidTiles = new Vector2[]
     {
-        bool result = false;
-        if (col >= 0 && col < tilemapMesh.meshCols && row >= 0 && row < tilemapMesh.meshRows)
+        new Vector2(6, 0), // grass
+        new Vector2(0, 1), // wall
+        new Vector2(5, 1), // bricks
+        new Vector2(6, 1), // ground
+    };
+
+    private bool IsSolidTile(int meshCol, int meshRow)
+    {
+        if (meshCol >= 0 && meshCol < tilemapMesh.meshCols && meshRow >= 0 && meshRow < tilemapMesh.meshRows)
         {
-            int uvI = (col + tilemapMesh.meshCols * row) * verticesPerTile;
+            int uvI = (meshCol + tilemapMesh.meshCols * meshRow) * verticesPerTile;
             Vector2 uv = meshFilter.sharedMesh.uv[uvI];
             int tilesetCol = (int)(uv.x / UVTileWidth);
-            int tilesetRow = (int)(uv.y / UVTileHeight);
-            // For now we just hardcode second bottom tile in the tileset as a single solid tile
-            result = (tilesetCol == 1 && tilesetRow == 0);
+            int tilesetRow = (TilesetRows - 1) - (int)(uv.y / UVTileHeight);
+            for (int i = 0; i < solidTiles.Length; ++i)
+            {
+                if (tilesetCol == solidTiles[i].x && tilesetRow == solidTiles[i].y)
+                {
+                    return true;
+                }
+            }
         }
-        return result;
+        return false;
     }
 
     private bool IsSolidTile(Vector2 tile)
