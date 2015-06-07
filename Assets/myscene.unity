@@ -348,11 +348,11 @@ MonoBehaviour:
   textureHeight: 64
   brushStartTileCol: 3
   brushStartTileRow: 0
-  brushEndTileCol: 3
-  brushEndTileRow: 0
+  brushEndTileCol: 4
+  brushEndTileRow: 1
   savedUVs: []
-  savedMeshCol: 39
-  savedMeshRow: 0
+  savedMeshCol: 50
+  savedMeshRow: 5
 --- !u!23 &1163590627
 MeshRenderer:
   m_ObjectHideFlags: 0
