@@ -12,6 +12,7 @@ public class Player : MonoBehaviour
     public float skinWidth = 0.02f;
     public float gravity = -25f;
     public float jumpVelocityY = 50;
+    public float jumpReductionVelocityY = -1;
     public bool isGrounded = false;
 
     private void Awake()
@@ -21,11 +22,11 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        // Ground friction
+        // Ground friction.
         float velocityXAfterFriction = velocity.x - Mathf.Sign(velocity.x) * groundFriction * Time.deltaTime;
         velocity.x = Mathf.Sign(velocityXAfterFriction) != Mathf.Sign(velocity.x) ? 0 : velocityXAfterFriction;
 
-        // Horizontal acceleration
+        // Horizontal acceleration.
         float horizontalAxis = Input.GetAxisRaw("Horizontal");
         velocity.x += horizontalAxis * runAcceleration * Time.deltaTime;
         velocity.x = Mathf.Clamp(velocity.x, -maxVelocityX, maxVelocityX);
@@ -41,13 +42,21 @@ public class Player : MonoBehaviour
             transform.Translate(new Vector2(horizontalAxis * 0.3f, 0));
         }
 
-        // Jumping
+        // Jumping.
         if (isGrounded && Input.GetButtonDown("Jump"))
         {
             velocity.y = jumpVelocityY;
         }
 
+        // Gravity.
         velocity.y += gravity * Time.deltaTime;
+
+        // Reduce jump height when "Jump" is not pressed.
+        if (velocity.y > 0 && !Input.GetButton("Jump"))
+        {
+            velocity.y += jumpReductionVelocityY;
+        }
+
         Vector2 deltaMovement = velocity * Time.deltaTime;
 
         isGrounded = false;
@@ -64,7 +73,7 @@ public class Player : MonoBehaviour
 
         if (deltaMovement.x != 0)
         {
-            // Move horizontally
+            // Move horizontally.
 
             bool isMovingRight = deltaMovement.x > 0;
             Vector2 baseRayOrigin = isMovingRight ? raycastOriginsBottomRight : raycastOriginsBottomLeft;
@@ -97,7 +106,7 @@ public class Player : MonoBehaviour
 
         if (deltaMovement.y != 0)
         {
-            // Move vertically
+            // Move vertically.
 
             bool isMovingUp = deltaMovement.y > 0;
             float rayDistance = Mathf.Abs(deltaMovement.y) + skinWidth;
