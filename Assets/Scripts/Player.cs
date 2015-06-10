@@ -10,7 +10,6 @@ public class Player : MonoBehaviour
     public int verticalRaysCount = 4;
     private BoxCollider2D boxCollider;
     public float skinWidth = 0.02f;
-    public LayerMask collisionMask = 0;
     public float gravity = -25f;
     public float jumpVelocityY = 50;
     public bool isGrounded = false;
@@ -76,7 +75,7 @@ public class Player : MonoBehaviour
             {
                 Vector2 rayOrigin = new Vector2(baseRayOrigin.x, baseRayOrigin.y + i * verticalDistanceBetweenRays);
                 Debug.DrawRay(rayOrigin, rayDirection * rayDistance, Color.red);
-                RaycastHit2D raycastHit = Physics2D.Raycast(rayOrigin, rayDirection, rayDistance, collisionMask);
+                RaycastHit2D raycastHit = Physics2D.Raycast(rayOrigin, rayDirection, rayDistance, 1 << LayerMask.NameToLayer("Default"));
                 if (raycastHit)
                 {
                     deltaMovement.x = raycastHit.point.x - rayOrigin.x;
@@ -106,11 +105,17 @@ public class Player : MonoBehaviour
             Vector2 baseRayOrigin = isMovingUp ? raycastOriginsTopLeft : raycastOriginsBottomLeft;
             baseRayOrigin.x += deltaMovement.x;
 
+            int mask = 1 << LayerMask.NameToLayer("Default");
+            if (!isMovingUp)
+            {
+                mask |= 1 << LayerMask.NameToLayer("OneWayPlatform");
+            }
+
             for (int i = 0; i < verticalRaysCount; ++i)
             {
                 Vector2 rayOrigin = new Vector2(baseRayOrigin.x + i * horizontalDistanceBetweenRays, baseRayOrigin.y);
                 Debug.DrawRay(rayOrigin, rayDirection * rayDistance, Color.red);
-                RaycastHit2D raycastHit = Physics2D.Raycast(rayOrigin, rayDirection, rayDistance, collisionMask);
+                RaycastHit2D raycastHit = Physics2D.Raycast(rayOrigin, rayDirection, rayDistance, mask);
                 if (raycastHit)
                 {
                     deltaMovement.y = raycastHit.point.y - rayOrigin.y;

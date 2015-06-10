@@ -170,7 +170,7 @@ public class LevelScriptEditor : Editor
             GenerateColliders();
         }
 
-        if (GUILayout.Button("Generate Collider"))
+        if (GUILayout.Button("Generate Colliders"))
         {
             GenerateColliders();
         }
@@ -519,6 +519,7 @@ public class LevelScriptEditor : Editor
 
     private void GenerateColliders()
     {
+        RestoreTiles();
         DeleteCollidersIfExist();
         GenerateNormalCollider();
         GenerateOneWayCollider();
