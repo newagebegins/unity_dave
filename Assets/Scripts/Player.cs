@@ -11,9 +11,20 @@ public class Player : MonoBehaviour
     private BoxCollider2D boxCollider;
     public float skinWidth = 0.02f;
     public float gravity = -25f;
-    public float jumpVelocityY = 50;
+    public float jumpVelocityY = 13;
     public float jumpReductionVelocityY = -1;
-    public bool isGrounded = false;
+    private bool isGrounded = false;
+    
+    public float ignoreOneWayPlatformsDuration = 0.1f;
+    private float ignoreOneWayPlatformsTimer = 0;
+    private bool IsIgnoringOneWayPlatforms
+    {
+        get { return ignoreOneWayPlatformsTimer > 0; }
+    }
+    private void IgnoreOneWayPlatforms()
+    {
+        ignoreOneWayPlatformsTimer = ignoreOneWayPlatformsDuration;
+    }
 
     private void Awake()
     {
@@ -50,6 +61,13 @@ public class Player : MonoBehaviour
             velocity.y = jumpVelocityY;
         }
 
+        // Jump down from one-way platforms.
+        ignoreOneWayPlatformsTimer -= Time.deltaTime;
+        if (!IsIgnoringOneWayPlatforms && Input.GetButton("Jump") && verticalAxis < 0)
+        {
+            IgnoreOneWayPlatforms();
+        }
+
         // Gravity.
         velocity.y += gravity * Time.deltaTime;
 
@@ -71,7 +89,7 @@ public class Player : MonoBehaviour
         float colliderUsableHeight = boxCollider.size.y * Mathf.Abs(transform.localScale.y) - (2f * skinWidth);
         float horizontalDistanceBetweenRays = colliderUsableWidth / ((float)verticalRaysCount - 1f);
         float verticalDistanceBetweenRays = colliderUsableHeight / ((float)horizontalRaysCount - 1f);
-        const float skinWidthFloatFudgeFactor = 0.001f;
+        const float skinWidthFloatFudgeFactor = 0.001f; // Helps avoiding float precision bugs.
 
         if (deltaMovement.x != 0)
         {
@@ -117,7 +135,7 @@ public class Player : MonoBehaviour
             baseRayOrigin.x += deltaMovement.x;
 
             int mask = 1 << LayerMask.NameToLayer("Default");
-            if (!isMovingUp && !(Input.GetButton("Jump") && verticalAxis < 0))
+            if (!isMovingUp && !IsIgnoringOneWayPlatforms)
             {
                 mask |= 1 << LayerMask.NameToLayer("OneWayPlatform");
             }
