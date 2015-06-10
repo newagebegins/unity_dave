@@ -6,7 +6,8 @@ using UnityEditor;
 [CustomEditor(typeof(TilemapMesh))]
 public class LevelScriptEditor : Editor
 {
-    private const string colliderObjectName = "Collider";
+    private const string normalColliderObjectName = "Collider";
+    private const string oneWayColliderObjectName = "OneWay";
     private const float meshSegmentWidth = 1f;
     private const float meshSegmentHeight = 1f;
     private const float textureTileWidth = 8;
@@ -24,6 +25,7 @@ public class LevelScriptEditor : Editor
     private static void CreateMesh()
     {
         GameObject gameObject = new GameObject("TilemapMesh");
+        gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
         MeshFilter meshFilter = gameObject.AddComponent<MeshFilter>();
         
         Mesh mesh = new Mesh();
@@ -165,18 +167,18 @@ public class LevelScriptEditor : Editor
             tilemapMesh.meshCols = guiMeshCols;
             tilemapMesh.meshRows = guiMeshRows;
 
-            GenerateCollider();
+            GenerateColliders();
         }
 
         if (GUILayout.Button("Generate Collider"))
         {
-            GenerateCollider();
+            GenerateColliders();
         }
 
         if (GUILayout.Button("Clear"))
         {
             meshFilter.sharedMesh.uv = new Vector2[meshFilter.sharedMesh.uv.Length]; // Reset UVs to (0, 0)
-            DeleteColliderIfExists();
+            DeleteCollidersIfExist();
         }
 
         if (texture)
@@ -307,7 +309,24 @@ public class LevelScriptEditor : Editor
         new Vector2(6, 1), // ground
     };
 
+    private Vector2[] oneWayTiles = new Vector2[]
+    {
+        new Vector2(3, 0), // crate 1
+        new Vector2(4, 0), // crate 2
+        new Vector2(5, 0), // ladder
+    };
+
     private bool IsSolidTile(int meshCol, int meshRow)
+    {
+        return IsTileInArray(meshCol, meshRow, solidTiles);
+    }
+
+    private bool IsOneWayTile(int meshCol, int meshRow)
+    {
+        return IsTileInArray(meshCol, meshRow, oneWayTiles);
+    }
+
+    private bool IsTileInArray(int meshCol, int meshRow, Vector2[] tiles)
     {
         if (meshCol >= 0 && meshCol < tilemapMesh.meshCols && meshRow >= 0 && meshRow < tilemapMesh.meshRows)
         {
@@ -315,9 +334,9 @@ public class LevelScriptEditor : Editor
             Vector2 uv = meshFilter.sharedMesh.uv[uvI];
             int tilesetCol = (int)(uv.x / UVTileWidth);
             int tilesetRow = (TilesetRows - 1) - (int)(uv.y / UVTileHeight);
-            for (int i = 0; i < solidTiles.Length; ++i)
+            for (int i = 0; i < tiles.Length; ++i)
             {
-                if (tilesetCol == solidTiles[i].x && tilesetRow == solidTiles[i].y)
+                if (tilesetCol == tiles[i].x && tilesetRow == tiles[i].y)
                 {
                     return true;
                 }
@@ -498,12 +517,81 @@ public class LevelScriptEditor : Editor
         meshFilter.sharedMesh.uv = newUV;
     }
 
-    private void GenerateCollider()
+    private void GenerateColliders()
+    {
+        DeleteCollidersIfExist();
+        GenerateNormalCollider();
+        GenerateOneWayCollider();
+    }
+
+    private void GenerateOneWayCollider()
+    {
+        // Find start one-way tile, start the collider path
+        // Read next tiles in the row
+        // If reached the end of the row or a non-one-way tile, end the collider path
+
+
+        // Gather all one-way tiles.
+        List<Vector2> unvisitedOneWayTiles = new List<Vector2>();
+        for (int row = 0; row < tilemapMesh.meshRows; ++row)
+        {
+            for (int col = 0; col < tilemapMesh.meshCols; ++col)
+            {
+                if (IsOneWayTile(col, row))
+                {
+                    unvisitedOneWayTiles.Add(new Vector2(col, row));
+                }
+            }
+        }
+
+        // Gather contiguous stripes of one-way tiles.
+        List<List<Vector2>> stripes = new List<List<Vector2>>();
+        while (unvisitedOneWayTiles.Count > 0)
+        {
+            List<Vector2> stripe = new List<Vector2>();
+            do
+            {
+                stripe.Add(unvisitedOneWayTiles[0]);
+                unvisitedOneWayTiles.RemoveAt(0);
+            } while (unvisitedOneWayTiles.Count > 0 && unvisitedOneWayTiles[0].x == (stripe[stripe.Count - 1].x + 1) && unvisitedOneWayTiles[0].y == stripe[0].y);
+            stripes.Add(stripe);
+        }
+
+         // Create paths for the polygon collider.
+        if (stripes.Count > 0)
+        {
+            GameObject gameObject = new GameObject(oneWayColliderObjectName);
+            gameObject.layer = LayerMask.NameToLayer("OneWayPlatform");
+            gameObject.transform.parent = tilemapMesh.transform;
+            PolygonCollider2D polygonCollider = gameObject.AddComponent<PolygonCollider2D>();
+            polygonCollider.pathCount = stripes.Count;
+
+            for (int stripeI = 0; stripeI < stripes.Count; ++stripeI)
+            {
+                List<Vector2> stripe = stripes[stripeI];
+                List<Vector2> pathPoints = new List<Vector2>();
+                
+                Vector2 topLeft = MeshTileCornerPoint(stripe[0], Corner.TopLeft);
+                Vector2 topRight = MeshTileCornerPoint(stripe[stripe.Count - 1], Corner.TopRight);
+                const float platformHeight = 0.1f;
+                float bottomY = topRight.y - platformHeight;
+                Vector2 bottomRight = new Vector2(topRight.x, bottomY);
+                Vector2 bottomLeft = new Vector2(topLeft.x, bottomY);
+                
+                pathPoints.Add(topLeft);
+                pathPoints.Add(topRight);
+                pathPoints.Add(bottomRight);
+                pathPoints.Add(bottomLeft);
+                
+                polygonCollider.SetPath(stripeI, pathPoints.ToArray());
+            }
+        }
+    }
+
+    private void GenerateNormalCollider()
     {
         // Tilemap game object has a child game object that contains one polygon collider
         // that encompasses all solid tiles.
-
-        DeleteColliderIfExists();
 
         // Gather all solid tiles.
         List<Vector2> unvisitedSolidTiles = new List<Vector2>();
@@ -553,7 +641,7 @@ public class LevelScriptEditor : Editor
         // Create paths for the polygon collider.
         if (solidIslands.Count > 0)
         {
-            GameObject gameObject = new GameObject(colliderObjectName);
+            GameObject gameObject = new GameObject(normalColliderObjectName);
             gameObject.transform.parent = tilemapMesh.transform;
             PolygonCollider2D polygonCollider = gameObject.AddComponent<PolygonCollider2D>();
             polygonCollider.pathCount = solidIslands.Count;
@@ -689,12 +777,14 @@ public class LevelScriptEditor : Editor
         }
     }
 
-    private void DeleteColliderIfExists()
+    private void DeleteCollidersIfExist()
     {
-        Transform colliderObject = tilemapMesh.transform.Find(colliderObjectName);
-        if (colliderObject)
-        {
-            DestroyImmediate(colliderObject.gameObject);
-        }
+        Transform normalColliderObject = tilemapMesh.transform.Find(normalColliderObjectName);
+        if (normalColliderObject)
+            DestroyImmediate(normalColliderObject.gameObject);
+
+        Transform oneWayColliderObject = tilemapMesh.transform.Find(oneWayColliderObjectName);
+        if (oneWayColliderObject)
+            DestroyImmediate(oneWayColliderObject.gameObject);
     }
 }
