@@ -438,6 +438,12 @@ public class LevelScriptEditor : Editor
             GUIUtility.hotControl = controlId;
             //Event.current.Use();
         }
+
+        if (SceneView.mouseOverWindow != SceneView.currentDrawingSceneView)
+        {
+            // Mouse has left the scene window.
+            RestoreTiles();
+        }
     }
 
     // Paint tiles using a rectangular brush of tiles selected in the tileset.
