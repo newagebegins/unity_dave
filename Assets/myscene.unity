@@ -158,6 +158,7 @@ GameObject:
   - 92: {fileID: 365623933}
   - 124: {fileID: 365623932}
   - 81: {fileID: 365623931}
+  - 114: {fileID: 365623936}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -225,11 +226,30 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 365623930}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 11.5600004, y: 6.53999996, z: -10}
+  m_LocalPosition: {x: 11.6000004, y: 6.5, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
+--- !u!114 &365623936
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 365623930}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b47591e8197256e4d96dc225ef8be77d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 1556864072}
+  xSpan: 2
+  ySpan: 2
+  drawBounds: 1
+  xMin: 11.6000004
+  yMin: 6.5
+  xMax: 100
+  yMax: 100
 --- !u!43 &563265056
 Mesh:
   m_ObjectHideFlags: 0
@@ -405,13 +425,13 @@ MonoBehaviour:
   meshRows: 64
   textureWidth: 64
   textureHeight: 64
-  brushStartTileCol: 0
+  brushStartTileCol: 6
   brushStartTileRow: 0
-  brushEndTileCol: 0
+  brushEndTileCol: 6
   brushEndTileRow: 0
   savedUVs: []
-  savedMeshCol: 13
-  savedMeshRow: 5
+  savedMeshCol: 21
+  savedMeshRow: 0
 --- !u!23 &1163590627
 MeshRenderer:
   m_ObjectHideFlags: 0
