@@ -507,7 +507,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1556864070}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4.63000011, y: 2.99000001, z: 0}
+  m_LocalPosition: {x: 4.63000011, y: 4.67000008, z: 0}
   m_LocalScale: {x: 12.5, y: 12.5, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -540,7 +540,9 @@ MonoBehaviour:
   maxVelocityX: 8
   groundFriction: 30
   horizontalRaysCount: 8
+  verticalRaysCount: 4
   skinWidth: .0199999996
   collisionMask:
     serializedVersion: 2
     m_Bits: 1
+  gravity: -25
