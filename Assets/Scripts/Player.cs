@@ -12,6 +12,8 @@ public class Player : MonoBehaviour
     public float skinWidth = 0.02f;
     public LayerMask collisionMask = 0;
     public float gravity = -25f;
+    public float jumpVelocityY = 50;
+    public bool isGrounded = false;
 
     private void Awake()
     {
@@ -33,8 +35,16 @@ public class Player : MonoBehaviour
         if ((horizontalAxis > 0 && transform.localScale.x < 0) || (horizontalAxis < 0 && transform.localScale.x > 0))
             transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
 
+        // Jumping
+        if (isGrounded && Input.GetButtonDown("Jump"))
+        {
+            velocity.y = jumpVelocityY;
+        }
+
         velocity.y += gravity * Time.deltaTime;
         Vector2 deltaMovement = velocity * Time.deltaTime;
+
+        isGrounded = false;
 
         Vector2 raycastOriginsBottomRight = new Vector2(boxCollider.bounds.max.x - skinWidth, boxCollider.bounds.min.y + skinWidth);
         Vector2 raycastOriginsBottomLeft = new Vector2(boxCollider.bounds.min.x + skinWidth, boxCollider.bounds.min.y + skinWidth);
@@ -105,6 +115,7 @@ public class Player : MonoBehaviour
                     else
                     {
                         deltaMovement.y += skinWidth;
+                        isGrounded = true;
                     }
 
                     if (rayDistance < skinWidth + skinWidthFloatFudgeFactor)
