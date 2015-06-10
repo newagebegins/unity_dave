@@ -22,12 +22,14 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
+        float verticalAxis = Input.GetAxisRaw("Vertical");
+        float horizontalAxis = Input.GetAxisRaw("Horizontal");
+
         // Ground friction.
         float velocityXAfterFriction = velocity.x - Mathf.Sign(velocity.x) * groundFriction * Time.deltaTime;
         velocity.x = Mathf.Sign(velocityXAfterFriction) != Mathf.Sign(velocity.x) ? 0 : velocityXAfterFriction;
 
         // Horizontal acceleration.
-        float horizontalAxis = Input.GetAxisRaw("Horizontal");
         velocity.x += horizontalAxis * runAcceleration * Time.deltaTime;
         velocity.x = Mathf.Clamp(velocity.x, -maxVelocityX, maxVelocityX);
 
@@ -43,7 +45,7 @@ public class Player : MonoBehaviour
         }
 
         // Jumping.
-        if (isGrounded && Input.GetButtonDown("Jump"))
+        if (isGrounded && Input.GetButtonDown("Jump") && verticalAxis == 0)
         {
             velocity.y = jumpVelocityY;
         }
@@ -115,7 +117,7 @@ public class Player : MonoBehaviour
             baseRayOrigin.x += deltaMovement.x;
 
             int mask = 1 << LayerMask.NameToLayer("Default");
-            if (!isMovingUp)
+            if (!isMovingUp && !(Input.GetButton("Jump") && verticalAxis < 0))
             {
                 mask |= 1 << LayerMask.NameToLayer("OneWayPlatform");
             }
