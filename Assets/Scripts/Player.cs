@@ -31,9 +31,16 @@ public class Player : MonoBehaviour
         velocity.x += horizontalAxis * runAcceleration * Time.deltaTime;
         velocity.x = Mathf.Clamp(velocity.x, -maxVelocityX, maxVelocityX);
 
-        // Flip the sprite if it faces the wrong direction
         if ((horizontalAxis > 0 && transform.localScale.x < 0) || (horizontalAxis < 0 && transform.localScale.x > 0))
+        {
+            // Flip the sprite.
             transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
+            
+            // When turning, move the player a little in the direction of movement to avoid stucking in walls.
+            // It is a hack to compensate for the fact that the player's box collider is not centered relative
+            // to the pivot point.
+            transform.Translate(new Vector2(horizontalAxis * 0.3f, 0));
+        }
 
         // Jumping
         if (isGrounded && Input.GetButtonDown("Jump"))
