@@ -53,28 +53,42 @@ public class Player : MonoBehaviour
 
         if (!IsShooting)
         {
-            // Horizontal acceleration.
-            velocity.x += horizontalAxis * runAcceleration * Time.deltaTime;
-            velocity.x = Mathf.Clamp(velocity.x, -maxVelocityX, maxVelocityX);
-
-            if ((horizontalAxis > 0 && transform.localScale.x < 0) || (horizontalAxis < 0 && transform.localScale.x > 0))
+            if (isGrounded)
             {
-                // Flip the sprite.
-                transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
-
-                // When turning, move the player a little in the direction of movement to avoid stucking in walls.
-                // It is a hack to compensate for the fact that the player's box collider is not centered relative
-                // to the pivot point.
-                transform.Translate(new Vector2(horizontalAxis * 0.3f, 0));
+                if (verticalAxis > 0)
+                {
+                    animator.Play(Animator.StringToHash("AimUp"));
+                }
+                else if (verticalAxis < 0)
+                {
+                    animator.Play(Animator.StringToHash("AimDown"));
+                }
             }
-
-            if (horizontalAxis != 0)
+            if (verticalAxis == 0)
             {
-                directionX = horizontalAxis;
+                // Horizontal acceleration.
+                velocity.x += horizontalAxis * runAcceleration * Time.deltaTime;
+                velocity.x = Mathf.Clamp(velocity.x, -maxVelocityX, maxVelocityX);
+
+                if ((horizontalAxis > 0 && transform.localScale.x < 0) || (horizontalAxis < 0 && transform.localScale.x > 0))
+                {
+                    // Flip the sprite.
+                    transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
+
+                    // When turning, move the player a little in the direction of movement to avoid stucking in walls.
+                    // It is a hack to compensate for the fact that the player's box collider is not centered relative
+                    // to the pivot point.
+                    transform.Translate(new Vector2(horizontalAxis * 0.3f, 0));
+                }
+
+                if (horizontalAxis != 0)
+                {
+                    directionX = horizontalAxis;
+                }
             }
 
             // Jumping.
-            if (isGrounded && Input.GetButtonDown("Jump") && verticalAxis == 0)
+            if (isGrounded && Input.GetButtonDown("Jump") && verticalAxis >= 0)
             {
                 velocity.y = jumpVelocityY;
             }
@@ -200,19 +214,25 @@ public class Player : MonoBehaviour
         }
         else
         {
-            if (isGrounded && velocity.x != 0)
+            if (verticalAxis == 0)
             {
-                animator.Play(Animator.StringToHash("Run"));
-            }
-            else
-            {
-                animator.Play(Animator.StringToHash("Idle"));
+                if (isGrounded && velocity.x != 0)
+                {
+                    animator.Play(Animator.StringToHash("Run"));
+                }
+                else
+                {
+                    animator.Play(Animator.StringToHash("Idle"));
+                }
             }
 
             if (Input.GetButtonDown("Fire1") && isGrounded)
             {
                 // Shoot
-                animator.Play(Animator.StringToHash("Shoot"));
+                if (verticalAxis == 0)
+                {
+                    animator.Play(Animator.StringToHash("Shoot"));
+                }
                 shootTimer = shootDuration;
                 velocity.x = -directionX * recoilVelocityX; // Recoil
             }
