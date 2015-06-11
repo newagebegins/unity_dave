@@ -5,7 +5,7 @@ AnimationClip:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: PlayerAimDown
+  m_Name: GunShot
   serializedVersion: 6
   m_Legacy: 0
   m_Compressed: 0
@@ -16,31 +16,29 @@ AnimationClip:
   - curve:
       serializedVersion: 2
       m_Curve:
-      - time: 0
-        value: {x: .0692000017, y: -.0395000018, z: 0}
-        inSlope: {x: 0, y: 0, z: 0}
-        outSlope: {x: 0, y: 0, z: 0}
+      - time: .166666672
+        value: {x: 0, y: 0, z: 0}
+        inSlope: {x: 0, y: 1.70000005, z: 0}
+        outSlope: {x: 0, y: 1.70000005, z: 0}
+        tangentMode: 0
+      - time: .666666687
+        value: {x: 0, y: .850000024, z: 0}
+        inSlope: {x: 0, y: 1.70000005, z: 0}
+        outSlope: {x: 0, y: 1.70000005, z: 0}
         tangentMode: 0
       m_PreInfinity: 2
       m_PostInfinity: 2
-    path: ShotEnd
-  - curve:
-      serializedVersion: 2
-      m_Curve:
-      - time: 0
-        value: {x: .00540000014, y: .0230999999, z: 0}
-        inSlope: {x: 0, y: 0, z: 0}
-        outSlope: {x: 0, y: 0, z: 0}
-        tangentMode: 0
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-    path: ShotStart
+    path: 
   m_ScaleCurves: []
   m_FloatCurves: []
   m_PPtrCurves:
   - curve:
     - time: 0
-      value: {fileID: 21300010, guid: 1988243345bc389408ca808cacb5e22f, type: 3}
+      value: {fileID: 21300000, guid: bbd79c2428d641049af5907b0f6e16ce, type: 3}
+    - time: .166666672
+      value: {fileID: 21300002, guid: bbd79c2428d641049af5907b0f6e16ce, type: 3}
+    - time: .666666687
+      value: {fileID: 21300002, guid: bbd79c2428d641049af5907b0f6e16ce, type: 3}
     attribute: m_Sprite
     path: 
     classID: 212
@@ -53,29 +51,25 @@ AnimationClip:
   m_ClipBindingConstant:
     genericBindings:
     - path: 0
+      attribute: 1
+      script: {fileID: 0}
+      classID: 4
+      customType: 0
+      isPPtrCurve: 0
+    - path: 0
       attribute: 0
       script: {fileID: 0}
       classID: 212
       customType: 23
       isPPtrCurve: 1
-    - path: 1396300407
-      attribute: 1
-      script: {fileID: 0}
-      classID: 4
-      customType: 0
-      isPPtrCurve: 0
-    - path: 3675204702
-      attribute: 1
-      script: {fileID: 0}
-      classID: 4
-      customType: 0
-      isPPtrCurve: 0
     pptrCurveMapping:
-    - {fileID: 21300010, guid: 1988243345bc389408ca808cacb5e22f, type: 3}
+    - {fileID: 21300000, guid: bbd79c2428d641049af5907b0f6e16ce, type: 3}
+    - {fileID: 21300002, guid: bbd79c2428d641049af5907b0f6e16ce, type: 3}
+    - {fileID: 21300002, guid: bbd79c2428d641049af5907b0f6e16ce, type: 3}
   m_AnimationClipSettings:
     serializedVersion: 2
     m_StartTime: 0
-    m_StopTime: .0166666675
+    m_StopTime: .683333337
     m_OrientationOffsetY: 0
     m_Level: 0
     m_CycleOffset: 0
@@ -93,35 +87,50 @@ AnimationClip:
   - curve:
       serializedVersion: 2
       m_Curve:
-      - time: 0
-        value: .0692000017
+      - time: .166666672
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: .666666687
+        value: 0
         inSlope: 0
         outSlope: 0
         tangentMode: 10
       m_PreInfinity: 2
       m_PostInfinity: 2
     attribute: m_LocalPosition.x
-    path: ShotEnd
+    path: 
     classID: 4
     script: {fileID: 0}
   - curve:
       serializedVersion: 2
       m_Curve:
-      - time: 0
-        value: -.0395000018
-        inSlope: 0
-        outSlope: 0
+      - time: .166666672
+        value: 0
+        inSlope: 1.70000005
+        outSlope: 1.70000005
+        tangentMode: 10
+      - time: .666666687
+        value: .850000024
+        inSlope: 1.70000005
+        outSlope: 1.70000005
         tangentMode: 10
       m_PreInfinity: 2
       m_PostInfinity: 2
     attribute: m_LocalPosition.y
-    path: ShotEnd
+    path: 
     classID: 4
     script: {fileID: 0}
   - curve:
       serializedVersion: 2
       m_Curve:
-      - time: 0
+      - time: .166666672
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: .666666687
         value: 0
         inSlope: 0
         outSlope: 0
@@ -129,53 +138,18 @@ AnimationClip:
       m_PreInfinity: 2
       m_PostInfinity: 2
     attribute: m_LocalPosition.z
-    path: ShotEnd
-    classID: 4
-    script: {fileID: 0}
-  - curve:
-      serializedVersion: 2
-      m_Curve:
-      - time: 0
-        value: .00540000014
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 10
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-    attribute: m_LocalPosition.x
-    path: ShotStart
-    classID: 4
-    script: {fileID: 0}
-  - curve:
-      serializedVersion: 2
-      m_Curve:
-      - time: 0
-        value: .0230999999
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 10
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-    attribute: m_LocalPosition.y
-    path: ShotStart
-    classID: 4
-    script: {fileID: 0}
-  - curve:
-      serializedVersion: 2
-      m_Curve:
-      - time: 0
-        value: 0
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 10
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-    attribute: m_LocalPosition.z
-    path: ShotStart
+    path: 
     classID: 4
     script: {fileID: 0}
   m_EulerEditorCurves: []
-  m_HasGenericRootTransform: 0
+  m_HasGenericRootTransform: 1
   m_HasMotionFloatCurves: 0
   m_GenerateMotionCurves: 0
-  m_Events: []
+  m_Events:
+  - time: .666666687
+    functionName: DestroyMyself
+    data: 
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0

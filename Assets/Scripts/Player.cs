@@ -18,6 +18,10 @@ public class Player : MonoBehaviour
     public float recoilVelocityX = 5;
     private float directionX = 1;
     
+    public GameObject gunshotPrefab;
+    private Transform shotStart;
+    private Transform shotEnd;
+    
     private float shootTimer = 0;
     public float shootDuration = 1f;
     private bool IsShooting
@@ -40,6 +44,8 @@ public class Player : MonoBehaviour
     {
         boxCollider = GetComponent<BoxCollider2D>();
         animator = GetComponent<Animator>();
+        shotStart = transform.Find("ShotStart");
+        shotEnd = transform.Find("ShotEnd");
     }
 
     private void Update()
@@ -235,6 +241,12 @@ public class Player : MonoBehaviour
                 }
                 shootTimer = shootDuration;
                 velocity.x = -directionX * recoilVelocityX; // Recoil
+
+                // Instantiate a gun shot animation.
+                GameObject gunShot = Instantiate(gunshotPrefab, shotEnd.position, Quaternion.identity) as GameObject;
+                //AnimatorClipInfo[] clipInfo = gunShot.transform.Find("Animation").GetComponent<Animator>().GetCurrentAnimatorClipInfo(0);
+                //var a = 1;
+                //Destroy(gunShot, gunShotDuration);
             }
         }
     }
