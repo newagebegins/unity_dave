@@ -508,6 +508,8 @@ MonoBehaviour:
   gravity: -25
   jumpVelocityY: 13
   jumpReductionVelocityY: -1
+  recoilVelocityX: 7
+  shootDuration: .5
   ignoreOneWayPlatformsDuration: .100000001
 --- !u!95 &1556864075
 Animator:

@@ -15,6 +15,15 @@ public class Player : MonoBehaviour
     public float jumpReductionVelocityY = -1;
     private bool isGrounded = false;
     private Animator animator;
+    public float recoilVelocityX = 5;
+    private float directionX = 1;
+    
+    private float shootTimer = 0;
+    public float shootDuration = 1f;
+    private bool IsShooting
+    {
+        get { return shootTimer > 0; }
+    }
     
     public float ignoreOneWayPlatformsDuration = 0.1f;
     private float ignoreOneWayPlatformsTimer = 0;
@@ -35,48 +44,59 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        float verticalAxis = Input.GetAxisRaw("Vertical");
-        float horizontalAxis = Input.GetAxisRaw("Horizontal");
+        float verticalAxis = Input.GetAxisRaw("Vertical"); // Can be -1, 0 or 1
+        float horizontalAxis = Input.GetAxisRaw("Horizontal"); // Can be -1, 0 or 1
 
         // Ground friction.
         float velocityXAfterFriction = velocity.x - Mathf.Sign(velocity.x) * groundFriction * Time.deltaTime;
         velocity.x = Mathf.Sign(velocityXAfterFriction) != Mathf.Sign(velocity.x) ? 0 : velocityXAfterFriction;
 
-        // Horizontal acceleration.
-        velocity.x += horizontalAxis * runAcceleration * Time.deltaTime;
-        velocity.x = Mathf.Clamp(velocity.x, -maxVelocityX, maxVelocityX);
-
-        if ((horizontalAxis > 0 && transform.localScale.x < 0) || (horizontalAxis < 0 && transform.localScale.x > 0))
+        if (!IsShooting)
         {
-            // Flip the sprite.
-            transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
-            
-            // When turning, move the player a little in the direction of movement to avoid stucking in walls.
-            // It is a hack to compensate for the fact that the player's box collider is not centered relative
-            // to the pivot point.
-            transform.Translate(new Vector2(horizontalAxis * 0.3f, 0));
-        }
+            // Horizontal acceleration.
+            velocity.x += horizontalAxis * runAcceleration * Time.deltaTime;
+            velocity.x = Mathf.Clamp(velocity.x, -maxVelocityX, maxVelocityX);
 
-        // Jumping.
-        if (isGrounded && Input.GetButtonDown("Jump") && verticalAxis == 0)
-        {
-            velocity.y = jumpVelocityY;
-        }
+            if ((horizontalAxis > 0 && transform.localScale.x < 0) || (horizontalAxis < 0 && transform.localScale.x > 0))
+            {
+                // Flip the sprite.
+                transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
 
-        // Jump down from one-way platforms.
-        ignoreOneWayPlatformsTimer -= Time.deltaTime;
-        if (!IsIgnoringOneWayPlatforms && Input.GetButton("Jump") && verticalAxis < 0)
-        {
-            IgnoreOneWayPlatforms();
+                // When turning, move the player a little in the direction of movement to avoid stucking in walls.
+                // It is a hack to compensate for the fact that the player's box collider is not centered relative
+                // to the pivot point.
+                transform.Translate(new Vector2(horizontalAxis * 0.3f, 0));
+            }
+
+            if (horizontalAxis != 0)
+            {
+                directionX = horizontalAxis;
+            }
+
+            // Jumping.
+            if (isGrounded && Input.GetButtonDown("Jump") && verticalAxis == 0)
+            {
+                velocity.y = jumpVelocityY;
+            }
+
+            // Jump down from one-way platforms.
+            ignoreOneWayPlatformsTimer -= Time.deltaTime;
+            if (!IsIgnoringOneWayPlatforms && Input.GetButton("Jump") && verticalAxis < 0)
+            {
+                IgnoreOneWayPlatforms();
+            }
         }
 
         // Gravity.
         velocity.y += gravity * Time.deltaTime;
 
-        // Reduce jump height when "Jump" is not pressed.
-        if (velocity.y > 0 && !Input.GetButton("Jump"))
+        if (!IsShooting)
         {
-            velocity.y += jumpReductionVelocityY;
+            // Reduce jump height when "Jump" is not pressed.
+            if (velocity.y > 0 && !Input.GetButton("Jump"))
+            {
+                velocity.y += jumpReductionVelocityY;
+            }
         }
 
         Vector2 deltaMovement = velocity * Time.deltaTime;
@@ -174,13 +194,28 @@ public class Player : MonoBehaviour
             velocity = deltaMovement / Time.deltaTime;
         }
 
-        if (isGrounded && velocity.x != 0)
+        if (IsShooting)
         {
-            animator.Play(Animator.StringToHash("Run"));
+            shootTimer -= Time.deltaTime;
         }
         else
         {
-            animator.Play(Animator.StringToHash("Idle"));
+            if (isGrounded && velocity.x != 0)
+            {
+                animator.Play(Animator.StringToHash("Run"));
+            }
+            else
+            {
+                animator.Play(Animator.StringToHash("Idle"));
+            }
+
+            if (Input.GetButtonDown("Fire1") && isGrounded)
+            {
+                // Shoot
+                animator.Play(Animator.StringToHash("Shoot"));
+                shootTimer = shootDuration;
+                velocity.x = -directionX * recoilVelocityX; // Recoil
+            }
         }
     }
 }
