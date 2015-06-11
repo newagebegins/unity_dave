@@ -14,6 +14,7 @@ public class Player : MonoBehaviour
     public float jumpVelocityY = 13;
     public float jumpReductionVelocityY = -1;
     private bool isGrounded = false;
+    private Animator animator;
     
     public float ignoreOneWayPlatformsDuration = 0.1f;
     private float ignoreOneWayPlatformsTimer = 0;
@@ -29,6 +30,7 @@ public class Player : MonoBehaviour
     private void Awake()
     {
         boxCollider = GetComponent<BoxCollider2D>();
+        animator = GetComponent<Animator>();
     }
 
     private void Update()
@@ -170,6 +172,15 @@ public class Player : MonoBehaviour
         if (Time.deltaTime > 0)
         {
             velocity = deltaMovement / Time.deltaTime;
+        }
+
+        if (isGrounded && velocity.x != 0)
+        {
+            animator.Play(Animator.StringToHash("Run"));
+        }
+        else
+        {
+            animator.Play(Animator.StringToHash("Idle"));
         }
     }
 }

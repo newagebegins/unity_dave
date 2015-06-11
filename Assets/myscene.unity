@@ -429,6 +429,7 @@ GameObject:
   - 212: {fileID: 1556864071}
   - 61: {fileID: 1556864073}
   - 114: {fileID: 1556864074}
+  - 95: {fileID: 1556864075}
   m_Layer: 8
   m_Name: Player
   m_TagString: Untagged
@@ -508,6 +509,23 @@ MonoBehaviour:
   jumpVelocityY: 13
   jumpReductionVelocityY: -1
   ignoreOneWayPlatformsDuration: .100000001
+--- !u!95 &1556864075
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1556864070}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 766274cf39cc64b4fb3af6e518339256, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
 --- !u!1 &1750689830
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,18 +1,18 @@
 fileFormatVersion: 2
 guid: 1988243345bc389408ca808cacb5e22f
-timeCreated: 1433848809
+timeCreated: 1433980455
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
-    21300000: dave_0
-    21300002: dave_1
-    21300004: dave_2
-    21300006: dave_3
-    21300008: dave_4
-    21300010: dave_5
-    21300012: dave_6
-    21300014: dave_7
-    21300016: dave_8
+    21300000: idle
+    21300002: run_1
+    21300004: run_2
+    21300006: shoot
+    21300008: aim_up
+    21300010: aim_down
+    21300012: reload_1
+    21300014: reload_2
+    21300016: back
   serializedVersion: 2
   mipmaps:
     mipMapMode: 0
@@ -58,7 +58,7 @@ TextureImporter:
   buildTargetSettings: []
   spriteSheet:
     sprites:
-    - name: dave_0
+    - name: idle
       rect:
         serializedVersion: 2
         x: 0
@@ -66,9 +66,9 @@ TextureImporter:
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: .5, y: .5}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: dave_1
+    - name: run_1
       rect:
         serializedVersion: 2
         x: 16
@@ -76,9 +76,9 @@ TextureImporter:
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: .5, y: .5}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: dave_2
+    - name: run_2
       rect:
         serializedVersion: 2
         x: 32
@@ -86,9 +86,9 @@ TextureImporter:
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: .5, y: .5}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: dave_3
+    - name: shoot
       rect:
         serializedVersion: 2
         x: 48
@@ -96,9 +96,9 @@ TextureImporter:
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: .5, y: .5}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: dave_4
+    - name: aim_up
       rect:
         serializedVersion: 2
         x: 64
@@ -106,9 +106,9 @@ TextureImporter:
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: .5, y: .5}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: dave_5
+    - name: aim_down
       rect:
         serializedVersion: 2
         x: 80
@@ -116,9 +116,9 @@ TextureImporter:
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: .5, y: .5}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: dave_6
+    - name: reload_1
       rect:
         serializedVersion: 2
         x: 96
@@ -126,9 +126,9 @@ TextureImporter:
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: .5, y: .5}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: dave_7
+    - name: reload_2
       rect:
         serializedVersion: 2
         x: 112
@@ -136,9 +136,9 @@ TextureImporter:
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: .5, y: .5}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: dave_8
+    - name: back
       rect:
         serializedVersion: 2
         x: 128
@@ -146,7 +146,7 @@ TextureImporter:
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: .5, y: .5}
       border: {x: 0, y: 0, z: 0, w: 0}
   spritePackingTag: 
   userData: 
