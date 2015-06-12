@@ -1,12 +1,13 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
     private Game game;   
     private Vector2 velocity = new Vector2(0, 0);
-    public float runAcceleration = 50;
+    public float accelerationX = 50;
     public float maxVelocityX = 8;
-    public float groundFriction = 30;
+    public float frictionX = 30;
     public int horizontalRaysCount = 8;
     public int verticalRaysCount = 4;
     private BoxCollider2D boxCollider;
@@ -19,6 +20,17 @@ public class Player : MonoBehaviour
     public float recoilVelocityX = 5;
     private float directionX = 1;
     public float shotDistance = 30;
+
+    private int maxBullets = 0;
+    private int numBullets = 0;
+    public GameObject ammoHUD;
+    private Image[] bulletImages;
+    public float stayToReloadDuration = 0.8f;
+    private float stayToReloadTimer = 0;
+    private bool IsReloading
+    {
+        get { return stayToReloadTimer > stayToReloadDuration; }
+    }
     
     public GameObject gunshotPrefab;
     private Transform shotStart;
@@ -49,6 +61,16 @@ public class Player : MonoBehaviour
         shotStart = transform.Find("ShotStart");
         shotEnd = transform.Find("ShotEnd");
         game = Camera.main.GetComponent<Game>();
+
+        maxBullets = ammoHUD.transform.childCount;
+        numBullets = maxBullets;
+        bulletImages = new Image[maxBullets];
+        for (int i = 0; i < bulletImages.Length; ++i)
+        {
+            Transform bulletTransform = ammoHUD.transform.Find("Bullet" + i);
+            Image bulletImage = bulletTransform.GetComponent<Image>();
+            bulletImages[i] = bulletImage;
+        }
     }
 
     private void Update()
@@ -57,7 +79,7 @@ public class Player : MonoBehaviour
         float horizontalAxis = Input.GetAxisRaw("Horizontal"); // Can be -1, 0 or 1
 
         // Ground friction.
-        float velocityXAfterFriction = velocity.x - Mathf.Sign(velocity.x) * groundFriction * Time.deltaTime;
+        float velocityXAfterFriction = velocity.x - Mathf.Sign(velocity.x) * frictionX * Time.deltaTime;
         velocity.x = Mathf.Sign(velocityXAfterFriction) != Mathf.Sign(velocity.x) ? 0 : velocityXAfterFriction;
 
         if (!IsShooting)
@@ -76,7 +98,7 @@ public class Player : MonoBehaviour
             if (verticalAxis == 0)
             {
                 // Horizontal acceleration.
-                velocity.x += horizontalAxis * runAcceleration * Time.deltaTime;
+                velocity.x += horizontalAxis * accelerationX * Time.deltaTime;
                 velocity.x = Mathf.Clamp(velocity.x, -maxVelocityX, maxVelocityX);
 
                 if ((horizontalAxis > 0 && transform.localScale.x < 0) || (horizontalAxis < 0 && transform.localScale.x > 0))
@@ -229,23 +251,26 @@ public class Player : MonoBehaviour
                 {
                     animator.Play(Animator.StringToHash("Run"));
                 }
-                else
+                else if (!IsReloading)
                 {
                     animator.Play(Animator.StringToHash("Idle"));
                 }
             }
 
-            if (Input.GetButtonDown("Fire1") && isGrounded)
+            if (numBullets > 0 && Input.GetButtonDown("Fire1") && isGrounded)
             {
                 // Shoot.
+
+                --numBullets;
+                shootTimer = shootDuration;
                 
                 if (verticalAxis == 0)
                 {
                     animator.Play(Animator.StringToHash("Shoot"));
                 }
-                
-                shootTimer = shootDuration;
-                velocity.x = -directionX * recoilVelocityX; // Recoil
+
+                // Recoil
+                velocity.x = -directionX * recoilVelocityX;
 
                 // Instantiate a gun shot animation.
                 GameObject gunShot = Instantiate(gunshotPrefab, shotEnd.position, Quaternion.identity) as GameObject;
@@ -261,6 +286,37 @@ public class Player : MonoBehaviour
                     game.CreateProjectileExplosion(hit.point);
                 }
             }
+
+            // Ammo reloading.
+            if (numBullets < maxBullets && isGrounded && velocity.x == 0)
+            {
+                if (!IsReloading)
+                {
+                    stayToReloadTimer += Time.deltaTime;
+                    if (IsReloading)
+                    {
+                        animator.Play(Animator.StringToHash("Reload"));
+                    }
+                }
+            }
+            else
+            {
+                stayToReloadTimer = 0;
+            }
+
+            // Update ammo HUD.
+            for (int i = 0; i < bulletImages.Length; ++i)
+            {
+                bulletImages[i].color = i < numBullets ? Color.white : Color.black;
+            }
+        }
+    }
+
+    public void OnOneBulletReloaded()
+    {
+        if (numBullets < maxBullets)
+        {
+            numBullets++;
         }
     }
 }
