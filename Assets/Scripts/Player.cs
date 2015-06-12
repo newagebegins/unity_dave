@@ -244,9 +244,8 @@ public class Player : MonoBehaviour
 
                 // Instantiate a gun shot animation.
                 GameObject gunShot = Instantiate(gunshotPrefab, shotEnd.position, Quaternion.identity) as GameObject;
-                //AnimatorClipInfo[] clipInfo = gunShot.transform.Find("Animation").GetComponent<Animator>().GetCurrentAnimatorClipInfo(0);
-                //var a = 1;
-                //Destroy(gunShot, gunShotDuration);
+                float scaleX = Mathf.Abs(gunShot.transform.localScale.x) * Mathf.Sign(transform.localScale.x);
+                gunShot.transform.localScale = new Vector3(scaleX, gunShot.transform.localScale.y, gunShot.transform.localScale.z);
             }
         }
     }
