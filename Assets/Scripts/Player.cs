@@ -2,6 +2,7 @@
 
 public class Player : MonoBehaviour
 {
+    private Game game;   
     private Vector2 velocity = new Vector2(0, 0);
     public float runAcceleration = 50;
     public float maxVelocityX = 8;
@@ -17,6 +18,7 @@ public class Player : MonoBehaviour
     private Animator animator;
     public float recoilVelocityX = 5;
     private float directionX = 1;
+    public float shotDistance = 30;
     
     public GameObject gunshotPrefab;
     private Transform shotStart;
@@ -46,6 +48,7 @@ public class Player : MonoBehaviour
         animator = GetComponent<Animator>();
         shotStart = transform.Find("ShotStart");
         shotEnd = transform.Find("ShotEnd");
+        game = Camera.main.GetComponent<Game>();
     }
 
     private void Update()
@@ -234,11 +237,13 @@ public class Player : MonoBehaviour
 
             if (Input.GetButtonDown("Fire1") && isGrounded)
             {
-                // Shoot
+                // Shoot.
+                
                 if (verticalAxis == 0)
                 {
                     animator.Play(Animator.StringToHash("Shoot"));
                 }
+                
                 shootTimer = shootDuration;
                 velocity.x = -directionX * recoilVelocityX; // Recoil
 
@@ -246,6 +251,15 @@ public class Player : MonoBehaviour
                 GameObject gunShot = Instantiate(gunshotPrefab, shotEnd.position, Quaternion.identity) as GameObject;
                 float scaleX = Mathf.Abs(gunShot.transform.localScale.x) * Mathf.Sign(transform.localScale.x);
                 gunShot.transform.localScale = new Vector3(scaleX, gunShot.transform.localScale.y, gunShot.transform.localScale.z);
+
+                // Do a raycast to see if we hit something.
+                int layerMask = 1 << LayerMask.NameToLayer("Default");
+                Vector2 shotDirection = shotEnd.position - shotStart.position;
+                RaycastHit2D hit = Physics2D.Raycast(shotStart.position, shotDirection, shotDistance, layerMask);
+                if (hit)
+                {
+                    game.CreateProjectileExplosion(hit.point);
+                }
             }
         }
     }

@@ -127,6 +127,7 @@ GameObject:
   - 124: {fileID: 365623932}
   - 81: {fileID: 365623931}
   - 114: {fileID: 365623936}
+  - 114: {fileID: 365623937}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -218,6 +219,19 @@ MonoBehaviour:
   yMin: 6.5
   xMax: 100
   yMax: 100
+--- !u!114 &365623937
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 365623930}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae49f9804dc4c1542b31335d6f72a4fc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  projectileExplosionPrefab: {fileID: 157418, guid: 4b12c7efe2d679247a84d58fd52c7fdb,
+    type: 2}
 --- !u!43 &563265056
 Mesh:
   m_ObjectHideFlags: 0
@@ -565,6 +579,7 @@ MonoBehaviour:
   jumpVelocityY: 13
   jumpReductionVelocityY: -1
   recoilVelocityX: 7
+  shotDistance: 30
   gunshotPrefab: {fileID: 112502, guid: d7d641e954a9de64aa95472414fe956e, type: 2}
   shootDuration: .5
   ignoreOneWayPlatformsDuration: .100000001
