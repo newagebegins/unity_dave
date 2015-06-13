@@ -319,11 +319,16 @@ public class Player : MonoBehaviour
                 gunShot.transform.localScale = new Vector3(scaleX, gunShot.transform.localScale.y, gunShot.transform.localScale.z);
 
                 // Do a raycast to see if we hit something.
-                int layerMask = 1 << LayerMask.NameToLayer("Default");
+                int layerMask = 1 << LayerMask.NameToLayer("Default") | 1 << LayerMask.NameToLayer("Enemy");
                 Vector2 shotDirection = shotEnd.position - shotStart.position;
                 RaycastHit2D hit = Physics2D.Raycast(shotStart.position, shotDirection, shotDistance, layerMask);
                 if (hit)
                 {
+                    if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Enemy"))
+                    {
+                        Enemy enemy = hit.collider.GetComponent<Enemy>();
+                        enemy.Hit();
+                    }
                     game.CreateProjectileExplosion(hit.point);
                 }
             }
