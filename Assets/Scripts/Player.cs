@@ -78,6 +78,8 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
+        body.Move(IsIgnoringOneWayPlatforms);
+
         switch (state)
         {
             case PlayerState.Normal:
@@ -204,7 +206,7 @@ public class Player : MonoBehaviour
                 }
 
                 // Ammo reloading.
-                if (numBullets < maxBullets && body.isGrounded && body.velocity.x == 0)
+                if (numBullets < maxBullets && body.isGrounded && body.velocity.x == 0 && verticalAxis == 0)
                 {
                     if (!IsReloading)
                     {
@@ -256,8 +258,6 @@ public class Player : MonoBehaviour
                 break;
             }
         }
-
-        body.Move(IsIgnoringOneWayPlatforms);
     }
 
     public void OnOneBulletReloaded()
