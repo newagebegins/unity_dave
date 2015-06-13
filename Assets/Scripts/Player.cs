@@ -3,6 +3,15 @@ using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
+    enum PlayerState
+    {
+        Normal,
+        Shoot,
+        OpenDoor,
+    }
+
+    private TreasureDoor treasureDoor;
+    private PlayerState state = PlayerState.Normal;
     private Game game;   
     private Vector2 velocity = new Vector2(0, 0);
     public float accelerationX = 50;
@@ -38,10 +47,9 @@ public class Player : MonoBehaviour
     
     private float shootTimer = 0;
     public float shootDuration = 1f;
-    private bool IsShooting
-    {
-        get { return shootTimer > 0; }
-    }
+
+    private float openDoorTimer = 0;
+    public float openDoorDuration = 0.5f;
     
     public float ignoreOneWayPlatformsDuration = 0.1f;
     private float ignoreOneWayPlatformsTimer = 0;
@@ -82,7 +90,7 @@ public class Player : MonoBehaviour
         float velocityXAfterFriction = velocity.x - Mathf.Sign(velocity.x) * frictionX * Time.deltaTime;
         velocity.x = Mathf.Sign(velocityXAfterFriction) != Mathf.Sign(velocity.x) ? 0 : velocityXAfterFriction;
 
-        if (!IsShooting)
+        if (state == PlayerState.Normal)
         {
             if (isGrounded)
             {
@@ -130,12 +138,39 @@ public class Player : MonoBehaviour
             {
                 IgnoreOneWayPlatforms();
             }
+
+            // Open treasure door.
+            if (isGrounded && verticalAxis > 0)
+            {
+                Collider2D doorCollider = Physics2D.OverlapArea(boxCollider.bounds.min, boxCollider.bounds.max, 1 << LayerMask.NameToLayer("TreasureDoor"));
+                if (doorCollider)
+                {
+                    treasureDoor = doorCollider.GetComponent<TreasureDoor>();
+                    if (treasureDoor.IsClosed)
+                    {
+                        velocity.x = 0;
+                        state = PlayerState.OpenDoor;
+                        openDoorTimer = 0;
+                        animator.Play(Animator.StringToHash("OpenDoor"));
+                    }
+                }
+            }
+        }
+
+        if (state == PlayerState.OpenDoor)
+        {
+            openDoorTimer += Time.deltaTime;
+            if (openDoorTimer > openDoorDuration)
+            {
+                state = PlayerState.Normal;
+                treasureDoor.Open();
+            }
         }
 
         // Gravity.
         velocity.y += gravity * Time.deltaTime;
 
-        if (!IsShooting)
+        if (state == PlayerState.Normal)
         {
             // Reduce jump height when "Jump" is not pressed.
             if (velocity.y > 0 && !Input.GetButton("Jump"))
@@ -174,22 +209,15 @@ public class Player : MonoBehaviour
                 RaycastHit2D raycastHit = Physics2D.Raycast(rayOrigin, rayDirection, rayDistance, 1 << LayerMask.NameToLayer("Default"));
                 if (raycastHit)
                 {
-                    if (raycastHit.collider.isTrigger)
+                    deltaMovement.x = raycastHit.point.x - rayOrigin.x;
+                    rayDistance = Mathf.Abs(deltaMovement.x);
+                    if (isMovingRight)
                     {
-                        HandleTriggerCollision(raycastHit);
+                        deltaMovement.x -= skinWidth;
                     }
                     else
                     {
-                        deltaMovement.x = raycastHit.point.x - rayOrigin.x;
-                        rayDistance = Mathf.Abs(deltaMovement.x);
-                        if (isMovingRight)
-                        {
-                            deltaMovement.x -= skinWidth;
-                        }
-                        else
-                        {
-                            deltaMovement.x += skinWidth;
-                        }
+                        deltaMovement.x += skinWidth;
                     }
 
                     if (rayDistance < skinWidth + skinWidthFloatFudgeFactor)
@@ -221,23 +249,16 @@ public class Player : MonoBehaviour
                 RaycastHit2D raycastHit = Physics2D.Raycast(rayOrigin, rayDirection, rayDistance, mask);
                 if (raycastHit)
                 {
-                    if (raycastHit.collider.isTrigger)
+                    deltaMovement.y = raycastHit.point.y - rayOrigin.y;
+                    rayDistance = Mathf.Abs(deltaMovement.y);
+                    if (isMovingUp)
                     {
-                        HandleTriggerCollision(raycastHit);
+                        deltaMovement.y -= skinWidth;
                     }
                     else
                     {
-                        deltaMovement.y = raycastHit.point.y - rayOrigin.y;
-                        rayDistance = Mathf.Abs(deltaMovement.y);
-                        if (isMovingUp)
-                        {
-                            deltaMovement.y -= skinWidth;
-                        }
-                        else
-                        {
-                            deltaMovement.y += skinWidth;
-                            isGrounded = true;
-                        }
+                        deltaMovement.y += skinWidth;
+                        isGrounded = true;
                     }
 
                     if (rayDistance < skinWidth + skinWidthFloatFudgeFactor)
@@ -253,11 +274,16 @@ public class Player : MonoBehaviour
             velocity = deltaMovement / Time.deltaTime;
         }
 
-        if (IsShooting)
+        if (state == PlayerState.Shoot)
         {
-            shootTimer -= Time.deltaTime;
+            shootTimer += Time.deltaTime;
+            if (shootTimer > shootDuration)
+            {
+                state = PlayerState.Normal;
+            }
         }
-        else
+        
+        if (state == PlayerState.Normal)
         {
             if (verticalAxis == 0)
             {
@@ -276,7 +302,8 @@ public class Player : MonoBehaviour
                 // Shoot.
 
                 --numBullets;
-                shootTimer = shootDuration;
+                shootTimer = 0;
+                state = PlayerState.Shoot;
                 
                 if (verticalAxis == 0)
                 {
@@ -334,15 +361,13 @@ public class Player : MonoBehaviour
         }
     }
 
-    private void HandleTriggerCollision(RaycastHit2D hit)
+    public void OnTriggerEnter2D(Collider2D collision)
     {
-        switch (hit.transform.tag)
+        if (collision.gameObject.layer == LayerMask.NameToLayer("Collectible"))
         {
-            case "Collectible":
-                Collectible collectible = hit.transform.GetComponent<Collectible>();
-                game.CreatePoints(hit.transform.position, collectible.scoreValue);
-                Destroy(hit.transform.gameObject);
-                break;
+            Collectible collectible = collision.GetComponent<Collectible>();
+            game.CreatePoints(collision.transform.position, collectible.scoreValue);
+            Destroy(collision.gameObject);
         }
     }
 }

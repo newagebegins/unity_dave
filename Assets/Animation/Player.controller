@@ -73,6 +73,23 @@ AnimatorState:
   m_Mirror: 0
   m_Motion: {fileID: 7400000, guid: 3b4ab651997be71419c103852402b692, type: 2}
   m_Tag: 
+--- !u!1102 &110263052
+AnimatorState:
+  serializedVersion: 5
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_Name: OpenDoor
+  m_Speed: 1
+  m_CycleOffset: 0
+  m_Transitions: []
+  m_StateMachineBehaviours: []
+  m_Position: {x: 50, y: 50, z: 0}
+  m_IKOnFeet: 0
+  m_WriteDefaultValues: 1
+  m_Mirror: 0
+  m_Motion: {fileID: 7400000, guid: 6dee0ab0c49c8654db4cc96b00c1e1c6, type: 2}
+  m_Tag: 
 --- !u!1102 &110265252
 AnimatorState:
   serializedVersion: 5
@@ -150,6 +167,9 @@ AnimatorStateMachine:
   - serializedVersion: 1
     m_State: {fileID: 110299578}
     m_Position: {x: 228, y: 108, z: 0}
+  - serializedVersion: 1
+    m_State: {fileID: 110263052}
+    m_Position: {x: 24, y: 204, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions: []
   m_EntryTransitions: []

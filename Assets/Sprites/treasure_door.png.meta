@@ -1,11 +1,11 @@
 fileFormatVersion: 2
 guid: c408fff13e3508146a8765df9eb355b2
-timeCreated: 1434173991
+timeCreated: 1434177457
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
-    21300000: treasure_door_0
-    21300002: treasure_door_1
+    21300000: treasure_door_closed
+    21300002: treasure_door_open
   serializedVersion: 2
   mipmaps:
     mipMapMode: 0
@@ -51,7 +51,7 @@ TextureImporter:
   buildTargetSettings: []
   spriteSheet:
     sprites:
-    - name: treasure_door_0
+    - name: treasure_door_closed
       rect:
         serializedVersion: 2
         x: 0
@@ -59,9 +59,9 @@ TextureImporter:
         width: 24
         height: 24
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: .5, y: .5}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: treasure_door_1
+    - name: treasure_door_open
       rect:
         serializedVersion: 2
         x: 24
@@ -69,7 +69,7 @@ TextureImporter:
         width: 24
         height: 24
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: .5, y: .5}
       border: {x: 0, y: 0, z: 0, w: 0}
   spritePackingTag: 
   userData: 
