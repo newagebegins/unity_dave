@@ -39,7 +39,7 @@ public class Enemy : MonoBehaviour
         health--;
         if (health <= 0)
         {
-            //game.CreateFleshChunks(transform.position);
+            game.CreateFleshChunks(transform.position);
             game.CreatePoints(transform.position, scoreValue);
             Destroy(gameObject);
         }

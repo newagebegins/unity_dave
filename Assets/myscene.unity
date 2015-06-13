@@ -399,6 +399,7 @@ MonoBehaviour:
   pointsPrefab: {fileID: 111088, guid: 2562a5caca1e61944b276855185d285e, type: 2}
   pointsSprite100: {fileID: 21300000, guid: d51b39b4016d46746bf59024ad4e6cc2, type: 3}
   pointsSprite400: {fileID: 21300002, guid: d51b39b4016d46746bf59024ad4e6cc2, type: 3}
+  fleshPrefab: {fileID: 189514, guid: c5f3b743729faf8439724a9973a00822, type: 2}
 --- !u!1 &427958876
 GameObject:
   m_ObjectHideFlags: 0

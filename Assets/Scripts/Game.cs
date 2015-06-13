@@ -31,4 +31,19 @@ public class Game : MonoBehaviour
                 break;
         }
     }
+
+    public GameObject fleshPrefab;
+    public void CreateFleshChunks(Vector3 position)
+    {
+        for (int i = 0; i < 4; ++i)
+        {
+            GameObject flesh = Instantiate(fleshPrefab, position, Quaternion.identity) as GameObject;
+            //float randomAngle = Random.Range(20, 160) * Mathf.Deg2Rad;
+            //Vector2 dir = new Vector2(Mathf.Cos(randomAngle), Mathf.Sin(randomAngle));
+            //Vector2 forceVector = dir * Random.Range(300, 600);
+            //flesh.GetComponent<Rigidbody2D>().AddForce(forceVector);
+            float lifeTime = Random.Range(5f, 12f) / 10f;
+            Destroy(flesh, lifeTime);
+        }
+    }
 }
