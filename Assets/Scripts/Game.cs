@@ -38,11 +38,11 @@ public class Game : MonoBehaviour
         for (int i = 0; i < 4; ++i)
         {
             GameObject fleshObj = Instantiate(fleshPrefab, position, Quaternion.identity) as GameObject;
-            Flesh flesh = fleshObj.GetComponent<Flesh>();
+            Body body = fleshObj.GetComponent<Body>();
             float randomAngle = Random.Range(20, 160) * Mathf.Deg2Rad;
             Vector2 dir = new Vector2(Mathf.Cos(randomAngle), Mathf.Sin(randomAngle));
             Vector2 velocity = dir * Random.Range(8, 20);
-            flesh.velocity = velocity;
+            body.velocity = velocity;
             float lifeTime = Random.Range(5f, 12f) / 10f;
             Destroy(fleshObj, lifeTime);
         }

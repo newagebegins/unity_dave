@@ -1247,6 +1247,7 @@ GameObject:
   - 114: {fileID: 1556864074}
   - 95: {fileID: 1556864075}
   - 50: {fileID: 1556864076}
+  - 114: {fileID: 1556864077}
   m_Layer: 8
   m_Name: Player
   m_TagString: Untagged
@@ -1320,11 +1321,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   accelerationX: 50
   maxVelocityX: 8
-  frictionX: 30
-  horizontalRaysCount: 8
-  verticalRaysCount: 4
-  skinWidth: .0199999996
-  gravity: -25
   jumpVelocityY: 13
   jumpReductionVelocityY: -1
   recoilVelocityX: 7
@@ -1367,6 +1363,25 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
+--- !u!114 &1556864077
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1556864070}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c17d5a6244bb82f44adf85da1d6120a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  velocity: {x: 0, y: 0}
+  groundFrictionX: 30
+  airFrictionX: 30
+  horizontalRaysCount: 8
+  verticalRaysCount: 4
+  skinWidth: .0199999996
+  gravity: -25
+  isGrounded: 0
 --- !u!1001 &1676331438
 Prefab:
   m_ObjectHideFlags: 0

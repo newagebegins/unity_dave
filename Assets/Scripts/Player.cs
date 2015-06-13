@@ -10,21 +10,15 @@ public class Player : MonoBehaviour
         OpenDoor,
     }
 
+    private Body body;
     private TreasureDoor treasureDoor;
     private PlayerState state = PlayerState.Normal;
     private Game game;   
-    private Vector2 velocity = new Vector2(0, 0);
     public float accelerationX = 50;
     public float maxVelocityX = 8;
-    public float frictionX = 30;
-    public int horizontalRaysCount = 8;
-    public int verticalRaysCount = 4;
     private BoxCollider2D boxCollider;
-    public float skinWidth = 0.02f;
-    public float gravity = -25f;
     public float jumpVelocityY = 13;
     public float jumpReductionVelocityY = -1;
-    private bool isGrounded = false;
     private Animator animator;
     public float recoilVelocityX = 5;
     private float directionX = 1;
@@ -64,6 +58,7 @@ public class Player : MonoBehaviour
 
     private void Awake()
     {
+        body = GetComponent<Body>();
         boxCollider = GetComponent<BoxCollider2D>();
         animator = GetComponent<Animator>();
         shotStart = transform.Find("ShotStart");
@@ -86,13 +81,11 @@ public class Player : MonoBehaviour
         float verticalAxis = Input.GetAxisRaw("Vertical"); // Can be -1, 0 or 1
         float horizontalAxis = Input.GetAxisRaw("Horizontal"); // Can be -1, 0 or 1
 
-        // Ground friction.
-        float velocityXAfterFriction = velocity.x - Mathf.Sign(velocity.x) * frictionX * Time.deltaTime;
-        velocity.x = Mathf.Sign(velocityXAfterFriction) != Mathf.Sign(velocity.x) ? 0 : velocityXAfterFriction;
+        body.ApplyHorizontalFriction();
 
         if (state == PlayerState.Normal)
         {
-            if (isGrounded)
+            if (body.isGrounded)
             {
                 if (verticalAxis > 0)
                 {
@@ -106,8 +99,8 @@ public class Player : MonoBehaviour
             if (verticalAxis == 0)
             {
                 // Horizontal acceleration.
-                velocity.x += horizontalAxis * accelerationX * Time.deltaTime;
-                velocity.x = Mathf.Clamp(velocity.x, -maxVelocityX, maxVelocityX);
+                body.velocity.x += horizontalAxis * accelerationX * Time.deltaTime;
+                body.velocity.x = Mathf.Clamp(body.velocity.x, -maxVelocityX, maxVelocityX);
 
                 if ((horizontalAxis > 0 && transform.localScale.x < 0) || (horizontalAxis < 0 && transform.localScale.x > 0))
                 {
@@ -127,9 +120,9 @@ public class Player : MonoBehaviour
             }
 
             // Jumping.
-            if (isGrounded && Input.GetButtonDown("Jump") && verticalAxis >= 0)
+            if (body.isGrounded && Input.GetButtonDown("Jump") && verticalAxis >= 0)
             {
-                velocity.y = jumpVelocityY;
+                body.velocity.y = jumpVelocityY;
             }
 
             // Jump down from one-way platforms.
@@ -140,7 +133,7 @@ public class Player : MonoBehaviour
             }
 
             // Open treasure door.
-            if (isGrounded && verticalAxis > 0)
+            if (body.isGrounded && verticalAxis > 0)
             {
                 Collider2D doorCollider = Physics2D.OverlapArea(boxCollider.bounds.min, boxCollider.bounds.max, 1 << LayerMask.NameToLayer("TreasureDoor"));
                 if (doorCollider)
@@ -148,7 +141,7 @@ public class Player : MonoBehaviour
                     treasureDoor = doorCollider.GetComponent<TreasureDoor>();
                     if (treasureDoor.IsClosed)
                     {
-                        velocity.x = 0;
+                        body.velocity.x = 0;
                         state = PlayerState.OpenDoor;
                         openDoorTimer = 0;
                         animator.Play(Animator.StringToHash("OpenDoor"));
@@ -167,112 +160,18 @@ public class Player : MonoBehaviour
             }
         }
 
-        // Gravity.
-        velocity.y += gravity * Time.deltaTime;
+        body.ApplyGravity();
 
         if (state == PlayerState.Normal)
         {
             // Reduce jump height when "Jump" is not pressed.
-            if (velocity.y > 0 && !Input.GetButton("Jump"))
+            if (body.velocity.y > 0 && !Input.GetButton("Jump"))
             {
-                velocity.y += jumpReductionVelocityY;
+                body.velocity.y += jumpReductionVelocityY;
             }
         }
 
-        Vector2 deltaMovement = velocity * Time.deltaTime;
-
-        isGrounded = false;
-
-        Vector2 raycastOriginsBottomRight = new Vector2(boxCollider.bounds.max.x - skinWidth, boxCollider.bounds.min.y + skinWidth);
-        Vector2 raycastOriginsBottomLeft = new Vector2(boxCollider.bounds.min.x + skinWidth, boxCollider.bounds.min.y + skinWidth);
-        Vector2 raycastOriginsTopLeft = new Vector2(boxCollider.bounds.min.x + skinWidth, boxCollider.bounds.max.y - skinWidth);
-
-        float colliderUsableWidth = boxCollider.size.x * Mathf.Abs(transform.localScale.x) - (2f * skinWidth);
-        float colliderUsableHeight = boxCollider.size.y * Mathf.Abs(transform.localScale.y) - (2f * skinWidth);
-        float horizontalDistanceBetweenRays = colliderUsableWidth / ((float)verticalRaysCount - 1f);
-        float verticalDistanceBetweenRays = colliderUsableHeight / ((float)horizontalRaysCount - 1f);
-        const float skinWidthFloatFudgeFactor = 0.001f; // Helps avoiding float precision bugs.
-
-        if (deltaMovement.x != 0)
-        {
-            // Move horizontally.
-
-            bool isMovingRight = deltaMovement.x > 0;
-            Vector2 baseRayOrigin = isMovingRight ? raycastOriginsBottomRight : raycastOriginsBottomLeft;
-            float rayDistance = Mathf.Abs(deltaMovement.x) + skinWidth;
-            Vector2 rayDirection = isMovingRight ? Vector2.right : -Vector2.right;
-
-            for (int i = 0; i < horizontalRaysCount; ++i)
-            {
-                Vector2 rayOrigin = new Vector2(baseRayOrigin.x, baseRayOrigin.y + i * verticalDistanceBetweenRays);
-                Debug.DrawRay(rayOrigin, rayDirection * rayDistance, Color.red);
-                RaycastHit2D raycastHit = Physics2D.Raycast(rayOrigin, rayDirection, rayDistance, 1 << LayerMask.NameToLayer("Default"));
-                if (raycastHit)
-                {
-                    deltaMovement.x = raycastHit.point.x - rayOrigin.x;
-                    rayDistance = Mathf.Abs(deltaMovement.x);
-                    if (isMovingRight)
-                    {
-                        deltaMovement.x -= skinWidth;
-                    }
-                    else
-                    {
-                        deltaMovement.x += skinWidth;
-                    }
-
-                    if (rayDistance < skinWidth + skinWidthFloatFudgeFactor)
-                        break;
-                }
-            }
-        }
-
-        if (deltaMovement.y != 0)
-        {
-            // Move vertically.
-
-            bool isMovingUp = deltaMovement.y > 0;
-            float rayDistance = Mathf.Abs(deltaMovement.y) + skinWidth;
-            Vector2 rayDirection = isMovingUp ? Vector2.up : -Vector2.up;
-            Vector2 baseRayOrigin = isMovingUp ? raycastOriginsTopLeft : raycastOriginsBottomLeft;
-            baseRayOrigin.x += deltaMovement.x;
-
-            int mask = 1 << LayerMask.NameToLayer("Default");
-            if (!isMovingUp && !IsIgnoringOneWayPlatforms)
-            {
-                mask |= 1 << LayerMask.NameToLayer("OneWayPlatform");
-            }
-
-            for (int i = 0; i < verticalRaysCount; ++i)
-            {
-                Vector2 rayOrigin = new Vector2(baseRayOrigin.x + i * horizontalDistanceBetweenRays, baseRayOrigin.y);
-                Debug.DrawRay(rayOrigin, rayDirection * rayDistance, Color.red);
-                RaycastHit2D raycastHit = Physics2D.Raycast(rayOrigin, rayDirection, rayDistance, mask);
-                if (raycastHit)
-                {
-                    deltaMovement.y = raycastHit.point.y - rayOrigin.y;
-                    rayDistance = Mathf.Abs(deltaMovement.y);
-                    if (isMovingUp)
-                    {
-                        deltaMovement.y -= skinWidth;
-                    }
-                    else
-                    {
-                        deltaMovement.y += skinWidth;
-                        isGrounded = true;
-                    }
-
-                    if (rayDistance < skinWidth + skinWidthFloatFudgeFactor)
-                        break;
-                }
-            }
-        }
-
-        transform.Translate(deltaMovement);
-
-        if (Time.deltaTime > 0)
-        {
-            velocity = deltaMovement / Time.deltaTime;
-        }
+        body.Move(IsIgnoringOneWayPlatforms);
 
         if (state == PlayerState.Shoot)
         {
@@ -287,7 +186,7 @@ public class Player : MonoBehaviour
         {
             if (verticalAxis == 0)
             {
-                if (isGrounded && velocity.x != 0)
+                if (body.isGrounded && body.velocity.x != 0)
                 {
                     animator.Play(Animator.StringToHash("Run"));
                 }
@@ -297,7 +196,7 @@ public class Player : MonoBehaviour
                 }
             }
 
-            if (numBullets > 0 && Input.GetButtonDown("Fire1") && isGrounded)
+            if (numBullets > 0 && Input.GetButtonDown("Fire1") && body.isGrounded)
             {
                 // Shoot.
 
@@ -311,7 +210,7 @@ public class Player : MonoBehaviour
                 }
 
                 // Recoil
-                velocity.x = -directionX * recoilVelocityX;
+                body.velocity.x = -directionX * recoilVelocityX;
 
                 // Instantiate a gun shot animation.
                 GameObject gunShot = Instantiate(gunshotPrefab, shotEnd.position, Quaternion.identity) as GameObject;
@@ -334,7 +233,7 @@ public class Player : MonoBehaviour
             }
 
             // Ammo reloading.
-            if (numBullets < maxBullets && isGrounded && velocity.x == 0)
+            if (numBullets < maxBullets && body.isGrounded && body.velocity.x == 0)
             {
                 if (!IsReloading)
                 {
