@@ -81,8 +81,6 @@ public class Player : MonoBehaviour
         float verticalAxis = Input.GetAxisRaw("Vertical"); // Can be -1, 0 or 1
         float horizontalAxis = Input.GetAxisRaw("Horizontal"); // Can be -1, 0 or 1
 
-        body.ApplyHorizontalFriction();
-
         if (state == PlayerState.Normal)
         {
             if (body.isGrounded)
@@ -110,7 +108,7 @@ public class Player : MonoBehaviour
                     // When turning, move the player a little in the direction of movement to avoid stucking in walls.
                     // It is a hack to compensate for the fact that the player's box collider is not centered relative
                     // to the pivot point.
-                    transform.Translate(new Vector2(horizontalAxis * 0.3f, 0));
+                    transform.Translate(new Vector2(horizontalAxis * 0.4f, 0));
                 }
 
                 if (horizontalAxis != 0)
@@ -159,8 +157,6 @@ public class Player : MonoBehaviour
                 treasureDoor.Open();
             }
         }
-
-        body.ApplyGravity();
 
         if (state == PlayerState.Normal)
         {

@@ -11,8 +11,6 @@ public class Flesh : MonoBehaviour
 
     private void Update()
     {
-        body.ApplyHorizontalFriction();
-        body.ApplyGravity();
         body.Move();
     }
 }

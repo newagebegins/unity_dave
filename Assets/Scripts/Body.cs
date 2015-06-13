@@ -19,20 +19,19 @@ public class Body : MonoBehaviour
         boxCollider = GetComponent<BoxCollider2D>();
     }
 
-    public void ApplyHorizontalFriction()
+    public void Move(bool ignoreOneWayPlatforms = false)
     {
+        // Horizontal friction.
         float frictionX = isGrounded ? groundFrictionX : airFrictionX;
         float velocityXAfterFriction = velocity.x - Mathf.Sign(velocity.x) * frictionX * Time.deltaTime;
         velocity.x = Mathf.Sign(velocityXAfterFriction) != Mathf.Sign(velocity.x) ? 0 : velocityXAfterFriction;
-    }
 
-    public void ApplyGravity()
-    {
+        // Gravity.
         velocity.y += gravity * Time.deltaTime;
-    }
 
-    public void Move(bool ignoreOneWayPlatforms = false)
-    {
+        // Movement
+        // --------
+
         Vector2 deltaMovement = velocity * Time.deltaTime;
 
         isGrounded = false;
