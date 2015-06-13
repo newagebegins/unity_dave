@@ -37,13 +37,14 @@ public class Game : MonoBehaviour
     {
         for (int i = 0; i < 4; ++i)
         {
-            GameObject flesh = Instantiate(fleshPrefab, position, Quaternion.identity) as GameObject;
-            //float randomAngle = Random.Range(20, 160) * Mathf.Deg2Rad;
-            //Vector2 dir = new Vector2(Mathf.Cos(randomAngle), Mathf.Sin(randomAngle));
-            //Vector2 forceVector = dir * Random.Range(300, 600);
-            //flesh.GetComponent<Rigidbody2D>().AddForce(forceVector);
+            GameObject fleshObj = Instantiate(fleshPrefab, position, Quaternion.identity) as GameObject;
+            Flesh flesh = fleshObj.GetComponent<Flesh>();
+            float randomAngle = Random.Range(20, 160) * Mathf.Deg2Rad;
+            Vector2 dir = new Vector2(Mathf.Cos(randomAngle), Mathf.Sin(randomAngle));
+            Vector2 velocity = dir * Random.Range(8, 20);
+            flesh.velocity = velocity;
             float lifeTime = Random.Range(5f, 12f) / 10f;
-            Destroy(flesh, lifeTime);
+            Destroy(fleshObj, lifeTime);
         }
     }
 }
