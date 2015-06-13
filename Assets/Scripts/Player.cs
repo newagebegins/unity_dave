@@ -174,15 +174,22 @@ public class Player : MonoBehaviour
                 RaycastHit2D raycastHit = Physics2D.Raycast(rayOrigin, rayDirection, rayDistance, 1 << LayerMask.NameToLayer("Default"));
                 if (raycastHit)
                 {
-                    deltaMovement.x = raycastHit.point.x - rayOrigin.x;
-                    rayDistance = Mathf.Abs(deltaMovement.x);
-                    if (isMovingRight)
+                    if (raycastHit.collider.isTrigger)
                     {
-                        deltaMovement.x -= skinWidth;
+                        HandleTriggerCollision(raycastHit);
                     }
                     else
                     {
-                        deltaMovement.x += skinWidth;
+                        deltaMovement.x = raycastHit.point.x - rayOrigin.x;
+                        rayDistance = Mathf.Abs(deltaMovement.x);
+                        if (isMovingRight)
+                        {
+                            deltaMovement.x -= skinWidth;
+                        }
+                        else
+                        {
+                            deltaMovement.x += skinWidth;
+                        }
                     }
 
                     if (rayDistance < skinWidth + skinWidthFloatFudgeFactor)
@@ -214,16 +221,23 @@ public class Player : MonoBehaviour
                 RaycastHit2D raycastHit = Physics2D.Raycast(rayOrigin, rayDirection, rayDistance, mask);
                 if (raycastHit)
                 {
-                    deltaMovement.y = raycastHit.point.y - rayOrigin.y;
-                    rayDistance = Mathf.Abs(deltaMovement.y);
-                    if (isMovingUp)
+                    if (raycastHit.collider.isTrigger)
                     {
-                        deltaMovement.y -= skinWidth;
+                        HandleTriggerCollision(raycastHit);
                     }
                     else
                     {
-                        deltaMovement.y += skinWidth;
-                        isGrounded = true;
+                        deltaMovement.y = raycastHit.point.y - rayOrigin.y;
+                        rayDistance = Mathf.Abs(deltaMovement.y);
+                        if (isMovingUp)
+                        {
+                            deltaMovement.y -= skinWidth;
+                        }
+                        else
+                        {
+                            deltaMovement.y += skinWidth;
+                            isGrounded = true;
+                        }
                     }
 
                     if (rayDistance < skinWidth + skinWidthFloatFudgeFactor)
@@ -317,6 +331,18 @@ public class Player : MonoBehaviour
         if (numBullets < maxBullets)
         {
             numBullets++;
+        }
+    }
+
+    private void HandleTriggerCollision(RaycastHit2D hit)
+    {
+        switch (hit.transform.tag)
+        {
+            case "Collectible":
+                Collectible collectible = hit.transform.GetComponent<Collectible>();
+                game.CreatePoints(hit.transform.position, collectible.scoreValue);
+                Destroy(hit.transform.gameObject);
+                break;
         }
     }
 }
