@@ -74,8 +74,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 12755025da20d814c9ee6ea5a83cab79, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speedX: 6
-  playerScanWidth: 6
+  speedX: 5
+  playerScanWidth: 10
+  dontSearchForPlayerDurationMin: .300000012
+  dontSearchForPlayerDurationMax: 1.5
 --- !u!114 &11465298
 MonoBehaviour:
   m_ObjectHideFlags: 1
