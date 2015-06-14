@@ -13,6 +13,7 @@ GameObject:
   - 114: {fileID: 11413368}
   - 61: {fileID: 6152884}
   - 114: {fileID: 11465298}
+  - 114: {fileID: 11497592}
   m_Layer: 12
   m_Name: Zombie
   m_TagString: Untagged
@@ -73,6 +74,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 12755025da20d814c9ee6ea5a83cab79, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  speedX: 6
+  playerScanWidth: 6
 --- !u!114 &11465298
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -86,6 +89,30 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   health: 2
   scoreValue: 100
+--- !u!114 &11497592
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 120846}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c17d5a6244bb82f44adf85da1d6120a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  velocity: {x: 0, y: 0}
+  groundFrictionX: 30
+  airFrictionX: 5
+  horizontalRaysCount: 8
+  verticalRaysCount: 4
+  skinWidth: .0199999996
+  gravity: -25
+  directionX: -1
+  flipTranslateX: .400000006
+  collisionLeft: 0
+  collisionRight: 0
+  collisionUp: 0
+  collisionDown: 0
 --- !u!212 &21262982
 SpriteRenderer:
   m_ObjectHideFlags: 1
