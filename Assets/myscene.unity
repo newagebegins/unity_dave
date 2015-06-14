@@ -1117,17 +1117,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22368af3372cb604097756d198008a34, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isSelectionMode: 0
   meshCols: 64
   meshRows: 64
   textureWidth: 64
   textureHeight: 64
-  brushStartTileCol: 5
-  brushStartTileRow: 0
-  brushEndTileCol: 5
-  brushEndTileRow: 0
-  savedUVs: []
-  savedMeshCol: 33
-  savedMeshRow: 11
+  tilesetSelectionMinCol: 0
+  tilesetSelectionMinRow: 0
+  tilesetSelectionMaxCol: 0
+  tilesetSelectionMaxRow: 0
+  sceneSelectionMinCol: 0
+  sceneSelectionMinRow: 0
+  sceneSelectionMaxCol: 0
+  sceneSelectionMaxRow: 0
+  previewSavedUVs: []
+  previewSavedMeshCol: 0
+  previewSavedMeshRow: 0
+  previewSavedWidthInTiles: 0
+  previewSavedHeightInTiles: 0
+  brushUVs: []
+  brushWidth: 0
+  brushHeight: 0
 --- !u!23 &1163590627
 MeshRenderer:
   m_ObjectHideFlags: 0

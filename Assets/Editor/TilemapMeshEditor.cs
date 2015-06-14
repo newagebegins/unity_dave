@@ -72,6 +72,9 @@ public class LevelScriptEditor : Editor
     private Vector2 mouseStartPosition = new Vector2();
     private Vector2 mouseEndPosition = new Vector2();
 
+    private Vector2 sceneMouseStartPosition = new Vector2();
+    private Vector2 sceneMouseEndPosition = new Vector2();
+
     private void OnEnable()
     {
         tilemapMesh = (TilemapMesh)target;
@@ -123,6 +126,37 @@ public class LevelScriptEditor : Editor
         if (guiMeshRows < 1)
         {
             guiMeshRows = 1;
+        }
+
+        if (tilemapMesh.isSelectionMode)
+        {
+            if (GUILayout.Button("Selection Mode Off"))
+            {
+                RestoreTiles();
+                tilemapMesh.isSelectionMode = false;
+                SceneView.RepaintAll();
+            }
+            if (GUILayout.Button("Copy selection"))
+            {
+                tilemapMesh.ResetTilesetSelection();
+                MakeBrushFromSceneSelection(false);
+                tilemapMesh.isSelectionMode = false;
+            }
+            if (GUILayout.Button("Cut selection"))
+            {
+                tilemapMesh.ResetTilesetSelection();
+                MakeBrushFromSceneSelection(true);
+                tilemapMesh.isSelectionMode = false;
+            }
+        }
+        else
+        {
+            if (GUILayout.Button("Selection Mode On"))
+            {
+                tilemapMesh.brushUVs.Clear();
+                tilemapMesh.isSelectionMode = true;
+                SceneView.RepaintAll();
+            }
         }
         
         if (GUILayout.Button("Resize Mesh"))
@@ -205,40 +239,22 @@ public class LevelScriptEditor : Editor
             if ((Event.current.type == EventType.MouseDrag) ||
                 (Event.current.type == EventType.MouseUp && Event.current.button == 0 && tilesetRect.Contains(Event.current.mousePosition)))
             {
-                // Need to restore the tiles before we change the brush.
-                RestoreTiles();
-
                 mouseEndPosition = Event.current.mousePosition;
                 int col1 = (int)((mouseStartPosition.x - tilesetRect.x) / tilesetTileWidth);
                 int row1 = (int)((mouseStartPosition.y - tilesetRect.y) / tilesetTileHeight);
                 int col2 = (int)((mouseEndPosition.x - tilesetRect.x) / tilesetTileWidth);
                 int row2 = (int)((mouseEndPosition.y - tilesetRect.y) / tilesetTileHeight);
-                if (col1 < col2)
-                {
-                    tilemapMesh.brushStartTileCol = col1;
-                    tilemapMesh.brushEndTileCol = col2;
-                }
-                else
-                {
-                    tilemapMesh.brushStartTileCol = col2;
-                    tilemapMesh.brushEndTileCol = col1;
-                }
-                if (row1 < row2)
-                {
-                    tilemapMesh.brushStartTileRow = row1;
-                    tilemapMesh.brushEndTileRow = row2;
-                }
-                else
-                {
-                    tilemapMesh.brushStartTileRow = row2;
-                    tilemapMesh.brushEndTileRow = row1;
-                }
+                
+                tilemapMesh.tilesetSelectionMinCol = Mathf.Clamp(Mathf.Min(col1, col2), 0, TilesetCols - 1);
+                tilemapMesh.tilesetSelectionMinRow = Mathf.Clamp(Mathf.Min(row1, row2), 0, TilesetRows - 1);
+                tilemapMesh.tilesetSelectionMaxCol = Mathf.Clamp(Mathf.Max(col1, col2), 0, TilesetCols - 1);
+                tilemapMesh.tilesetSelectionMaxRow = Mathf.Clamp(Mathf.Max(row1, row2), 0, TilesetRows - 1);
 
-                tilemapMesh.brushStartTileCol = Mathf.Clamp(tilemapMesh.brushStartTileCol, 0, TilesetCols - 1);
-                tilemapMesh.brushStartTileRow = Mathf.Clamp(tilemapMesh.brushStartTileRow, 0, TilesetRows - 1);
-                tilemapMesh.brushEndTileCol = Mathf.Clamp(tilemapMesh.brushEndTileCol, 0, TilesetCols - 1);
-                tilemapMesh.brushEndTileRow = Mathf.Clamp(tilemapMesh.brushEndTileRow, 0, TilesetRows - 1);
-
+                if (Event.current.type == EventType.MouseUp)
+                {
+                    MakeBrushFromTilesetSelection();
+                }
+                
                 Repaint();
             }
 
@@ -250,10 +266,10 @@ public class LevelScriptEditor : Editor
             Handles.DrawLine(new Vector2(mouseStartPosition.x, mouseEndPosition.y), new Vector2(mouseStartPosition.x, mouseStartPosition.y));
 #endif
             // Draw a border around the selected tiles.
-            float selectionLeft = tilesetRect.xMin + tilemapMesh.brushStartTileCol * tilesetTileWidth;
-            float selectionTop = tilesetRect.yMin + tilemapMesh.brushStartTileRow * tilesetTileHeight;
-            float selectionRight = selectionLeft + tilemapMesh.BrushWidth * tilesetTileWidth;
-            float selectionBottom = selectionTop + tilemapMesh.BrushHeight * tilesetTileHeight;
+            float selectionLeft = tilesetRect.xMin + tilemapMesh.tilesetSelectionMinCol * tilesetTileWidth;
+            float selectionTop = tilesetRect.yMin + tilemapMesh.tilesetSelectionMinRow * tilesetTileHeight;
+            float selectionRight = selectionLeft + tilemapMesh.TilesetSelectionWidth * tilesetTileWidth;
+            float selectionBottom = selectionTop + tilemapMesh.TilesetSelectionHeight * tilesetTileHeight;
             Handles.DrawAAPolyLine(10f,
                 new Vector3(selectionLeft, selectionBottom),
                 new Vector3(selectionRight, selectionBottom),
@@ -418,25 +434,89 @@ public class LevelScriptEditor : Editor
         Ray mouseRay = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
         Vector2 mousePos = new Vector2(mouseRay.origin.x, mouseRay.origin.y);
 
-        if (Event.current.type == EventType.MouseMove)
+        if (tilemapMesh.isSelectionMode)
         {
-            RestoreTiles();
+            // SELECTION MODE
+
             if (editorTilemapCollider.OverlapPoint(mousePos))
             {
-                PaintTiles(mousePos, true);
+                if (Event.current.button == 0)
+                {
+                    if (Event.current.type == EventType.MouseDown)
+                    {
+                        sceneMouseStartPosition = sceneMouseEndPosition = mousePos;
+                        GUIUtility.hotControl = GUIUtility.GetControlID(FocusType.Passive);
+                        SceneView.RepaintAll();
+                    }
+                    else if (Event.current.type == EventType.MouseDrag || Event.current.type == EventType.MouseUp)
+                    {
+                        sceneMouseEndPosition = mousePos;
+                        GUIUtility.hotControl = GUIUtility.GetControlID(FocusType.Passive);
+                        SceneView.RepaintAll();
+                    }
+                }
             }
-        }
-        
-        if ((Event.current.type == EventType.MouseDown || Event.current.type == EventType.MouseDrag) &&
-            Event.current.button == 0 &&
-            editorTilemapCollider.OverlapPoint(mousePos))
-        {
-            PaintTiles(mousePos, false);
 
-            // Prevent other instruments from gaining focus while painting
-            int controlId = GUIUtility.GetControlID(FocusType.Passive);
-            GUIUtility.hotControl = controlId;
-            //Event.current.Use();
+            Handles.DrawLine(new Vector2(sceneMouseStartPosition.x, sceneMouseStartPosition.y), new Vector2(sceneMouseEndPosition.x, sceneMouseStartPosition.y));
+            Handles.DrawLine(new Vector2(sceneMouseEndPosition.x, sceneMouseStartPosition.y), new Vector2(sceneMouseEndPosition.x, sceneMouseEndPosition.y));
+            Handles.DrawLine(new Vector2(sceneMouseEndPosition.x, sceneMouseEndPosition.y), new Vector2(sceneMouseStartPosition.x, sceneMouseEndPosition.y));
+            Handles.DrawLine(new Vector2(sceneMouseStartPosition.x, sceneMouseEndPosition.y), new Vector2(sceneMouseStartPosition.x, sceneMouseStartPosition.y));
+
+            float selectionMinX = Mathf.Min(sceneMouseStartPosition.x, sceneMouseEndPosition.x);
+            float selectionMaxX = Mathf.Max(sceneMouseStartPosition.x, sceneMouseEndPosition.x);
+            float selectionMinY = Mathf.Min(sceneMouseStartPosition.y, sceneMouseEndPosition.y);
+            float selectionMaxY = Mathf.Max(sceneMouseStartPosition.y, sceneMouseEndPosition.y);
+
+            int meshMinCol = (int)((selectionMinX - editorTilemapCollider.bounds.min.x) / meshSegmentWidth);
+            int meshMinRow = (int)((selectionMinY - editorTilemapCollider.bounds.min.y) / meshSegmentWidth);
+
+            int meshMaxCol = (int)((selectionMaxX - editorTilemapCollider.bounds.min.x) / meshSegmentWidth);
+            int meshMaxRow = (int)((selectionMaxY - editorTilemapCollider.bounds.min.y) / meshSegmentWidth);
+
+            tilemapMesh.sceneSelectionMinCol = meshMinCol;
+            tilemapMesh.sceneSelectionMinRow = meshMinRow;
+            tilemapMesh.sceneSelectionMaxCol = meshMaxCol;
+            tilemapMesh.sceneSelectionMaxRow = meshMaxRow;
+
+            int selectionWidthInTiles = meshMaxCol - meshMinCol + 1;
+            int selectionHeightInTiles = meshMaxRow - meshMinRow + 1;
+
+            //Debug.Log("minCol = " + meshMinCol + ", minRow = " + meshMinRow + ", maxCol = " + meshMaxCol + ", maxRow = " + meshMaxRow);
+
+            float snapSelectionLeft = editorTilemapCollider.bounds.min.x + meshMinCol * meshSegmentWidth;
+            float snapSelectionTop = editorTilemapCollider.bounds.min.y + (meshMaxRow + 1) * meshSegmentHeight;
+            float snapSelectionRight = snapSelectionLeft + selectionWidthInTiles * meshSegmentWidth;
+            float snapSelectionBottom = snapSelectionTop - selectionHeightInTiles * meshSegmentHeight;
+
+            Handles.DrawAAPolyLine(10f,
+                new Vector3(snapSelectionLeft, snapSelectionBottom),
+                new Vector3(snapSelectionRight, snapSelectionBottom),
+                new Vector3(snapSelectionRight, snapSelectionTop),
+                new Vector3(snapSelectionLeft, snapSelectionTop),
+                new Vector3(snapSelectionLeft, snapSelectionBottom));
+        }
+        else
+        {
+            // PAINT MODE
+
+            if (Event.current.type == EventType.MouseMove)
+            {
+                RestoreTiles();
+                if (editorTilemapCollider.OverlapPoint(mousePos))
+                {
+                    PaintTiles(mousePos, true);
+                }
+            }
+
+            if ((Event.current.type == EventType.MouseDown || Event.current.type == EventType.MouseDrag) &&
+                Event.current.button == 0 &&
+                editorTilemapCollider.OverlapPoint(mousePos))
+            {
+                PaintTiles(mousePos, false);
+
+                // Prevent other instruments from gaining focus while painting
+                GUIUtility.hotControl = GUIUtility.GetControlID(FocusType.Passive);
+            }
         }
 
         if (SceneView.mouseOverWindow != SceneView.currentDrawingSceneView)
@@ -446,7 +526,52 @@ public class LevelScriptEditor : Editor
         }
     }
 
-    // Paint tiles using a rectangular brush of tiles selected in the tileset.
+    private void MakeBrushFromTilesetSelection()
+    {
+        tilemapMesh.brushUVs.Clear();
+        tilemapMesh.brushWidth = tilemapMesh.TilesetSelectionWidth;
+        tilemapMesh.brushHeight = tilemapMesh.TilesetSelectionHeight;
+        for (int tilesetRow = tilemapMesh.tilesetSelectionMinRow; tilesetRow <= tilemapMesh.tilesetSelectionMaxRow; ++tilesetRow)
+        {
+            for (int tilesetCol = tilemapMesh.tilesetSelectionMinCol; tilesetCol <= tilemapMesh.tilesetSelectionMaxCol; ++tilesetCol)
+            {
+                int brushTileRowConverted = TilesetRows - tilesetRow - 1; // Convert so that bottom row is zero
+                tilemapMesh.brushUVs.Add(new Vector2(tilesetCol * UVTileWidth, brushTileRowConverted * UVTileHeight));
+                tilemapMesh.brushUVs.Add(new Vector2(tilesetCol * UVTileWidth, (brushTileRowConverted + 1 ) * UVTileHeight));
+                tilemapMesh.brushUVs.Add(new Vector2((tilesetCol + 1) * UVTileWidth, (brushTileRowConverted + 1) * UVTileHeight));
+                tilemapMesh.brushUVs.Add(new Vector2((tilesetCol + 1) * UVTileWidth, brushTileRowConverted * UVTileHeight));
+            }
+        }
+    }
+
+    private void MakeBrushFromSceneSelection(bool cut)
+    {
+        Vector2[] newUV = meshFilter.sharedMesh.uv;
+
+        tilemapMesh.brushUVs.Clear();
+        tilemapMesh.brushWidth = tilemapMesh.SceneSelectionWidth;
+        tilemapMesh.brushHeight = tilemapMesh.SceneSelectionHeight;
+
+        for (int meshRow = tilemapMesh.sceneSelectionMaxRow; meshRow >= tilemapMesh.sceneSelectionMinRow; --meshRow)
+        {
+            for (int meshCol = tilemapMesh.sceneSelectionMinCol; meshCol <= tilemapMesh.sceneSelectionMaxCol; ++meshCol)
+            {
+                int tileIndex = meshCol + meshRow * tilemapMesh.meshCols;
+                int vertexI = tileIndex * verticesPerTile;
+                for (int i = 0; i < verticesPerTile; ++i)
+                {
+                    tilemapMesh.brushUVs.Add(newUV[vertexI + i]);
+                    if (cut)
+                    {
+                        newUV[vertexI + i] = new Vector2(0, 0);
+                    }
+                }
+            }
+        }
+
+        meshFilter.sharedMesh.uv = newUV;
+    }
+
     private void PaintTiles(Vector2 mousePos, bool saveUVs)
     {
         Vector2[] newUV = meshFilter.sharedMesh.uv;
@@ -454,34 +579,37 @@ public class LevelScriptEditor : Editor
         int meshBaseCol = (int)((mousePos.x - editorTilemapCollider.bounds.min.x) / meshSegmentWidth);
         int meshBaseRow = (int)((mousePos.y - editorTilemapCollider.bounds.min.y) / meshSegmentWidth);
 
-        tilemapMesh.savedMeshCol = meshBaseCol;
-        tilemapMesh.savedMeshRow = meshBaseRow;
-        tilemapMesh.savedUVs.Clear();
+        tilemapMesh.previewSavedMeshCol = meshBaseCol;
+        tilemapMesh.previewSavedMeshRow = meshBaseRow;
+        tilemapMesh.previewSavedUVs.Clear();
 
-        for (int meshRow = meshBaseRow, tilesetRow = tilemapMesh.brushStartTileRow;
-            meshRow > (meshBaseRow - tilemapMesh.BrushHeight) && meshRow >= 0 && meshRow < tilemapMesh.meshRows;
-            --meshRow, ++tilesetRow)
+        int selectionUVIndex = 0;
+
+        if (saveUVs)
         {
-            for (int meshCol = meshBaseCol, tilesetCol = tilemapMesh.brushStartTileCol;
-                meshCol < (meshBaseCol + tilemapMesh.BrushWidth) && meshCol >= 0 && meshCol < tilemapMesh.meshCols;
-                ++meshCol, ++tilesetCol)
+            tilemapMesh.previewSavedHeightInTiles = tilemapMesh.brushHeight;
+            tilemapMesh.previewSavedWidthInTiles = tilemapMesh.brushWidth;
+        }
+
+        for (int meshRow = meshBaseRow;
+            meshRow > (meshBaseRow - tilemapMesh.brushHeight) && meshRow >= 0 && meshRow < tilemapMesh.meshRows;
+            --meshRow)
+        {
+            for (int meshCol = meshBaseCol;
+                meshCol < (meshBaseCol + tilemapMesh.brushWidth) && meshCol >= 0 && meshCol < tilemapMesh.meshCols;
+                ++meshCol)
             {
                 int tileIndex = meshCol + meshRow * tilemapMesh.meshCols;
-                int brushTileRowConverted = TilesetRows - tilesetRow - 1; // Convert so that bottom row is zero
                 int vertexI = tileIndex * verticesPerTile;
 
-                if (saveUVs)
+                for (int i = 0; i < verticesPerTile; ++i)
                 {
-                    tilemapMesh.savedUVs.Add(newUV[vertexI + 0]);
-                    tilemapMesh.savedUVs.Add(newUV[vertexI + 1]);
-                    tilemapMesh.savedUVs.Add(newUV[vertexI + 2]);
-                    tilemapMesh.savedUVs.Add(newUV[vertexI + 3]);
+                    if (saveUVs)
+                    {
+                        tilemapMesh.previewSavedUVs.Add(newUV[vertexI + i]);
+                    }
+                    newUV[vertexI + i] = tilemapMesh.brushUVs[selectionUVIndex++];
                 }
-
-                newUV[vertexI + 0] = new Vector2(tilesetCol * UVTileWidth, brushTileRowConverted * UVTileHeight);
-                newUV[vertexI + 1] = new Vector2(tilesetCol * UVTileWidth, brushTileRowConverted * UVTileHeight + UVTileHeight);
-                newUV[vertexI + 2] = new Vector2(tilesetCol * UVTileWidth + UVTileWidth, brushTileRowConverted * UVTileHeight + UVTileHeight);
-                newUV[vertexI + 3] = new Vector2(tilesetCol * UVTileWidth + UVTileWidth, brushTileRowConverted * UVTileHeight);
             }
         }
 
@@ -490,33 +618,36 @@ public class LevelScriptEditor : Editor
 
     private void RestoreTiles()
     {
-        if (tilemapMesh.savedUVs.Count <= 0)
+        if (tilemapMesh.previewSavedUVs.Count <= 0)
         {
             return;
         }
 
-        DebugUtils.Assert(tilemapMesh.savedUVs.Count % verticesPerTile == 0);
+        if (tilemapMesh.previewSavedUVs.Count % verticesPerTile != 0)
+        {
+            Debug.LogError("previewSavedUVs.Count is incorrect");
+        }
 
         Vector2[] newUV = meshFilter.sharedMesh.uv;
 
-        int meshBaseCol = tilemapMesh.savedMeshCol;
-        int meshBaseRow = tilemapMesh.savedMeshRow;
+        int meshBaseCol = tilemapMesh.previewSavedMeshCol;
+        int meshBaseRow = tilemapMesh.previewSavedMeshRow;
 
         for (int meshRow = meshBaseRow;
-            meshRow > (meshBaseRow - tilemapMesh.BrushHeight) && meshRow >= 0 && meshRow < tilemapMesh.meshRows;
+            meshRow > (meshBaseRow - tilemapMesh.previewSavedHeightInTiles) && meshRow >= 0 && meshRow < tilemapMesh.meshRows;
             --meshRow)
         {
             for (int meshCol = meshBaseCol;
-                meshCol < (meshBaseCol + tilemapMesh.BrushWidth) && meshCol >= 0 && meshCol < tilemapMesh.meshCols;
+                meshCol < (meshBaseCol + tilemapMesh.previewSavedWidthInTiles) && meshCol >= 0 && meshCol < tilemapMesh.meshCols;
                 ++meshCol)
             {
                 int tileIndex = meshCol + meshRow * tilemapMesh.meshCols;
                 int vertexI = tileIndex * verticesPerTile;
                 for (int i = 0; i < verticesPerTile; ++i)
                 {
-                    newUV[vertexI + i] = tilemapMesh.savedUVs[i];
+                    newUV[vertexI + i] = tilemapMesh.previewSavedUVs[i];
                 }
-                tilemapMesh.savedUVs.RemoveRange(0, verticesPerTile);
+                tilemapMesh.previewSavedUVs.RemoveRange(0, verticesPerTile);
             }
         }
 
