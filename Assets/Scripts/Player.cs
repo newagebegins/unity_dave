@@ -21,7 +21,6 @@ public class Player : MonoBehaviour
     public float jumpReductionVelocityY = -1;
     private Animator animator;
     public float recoilVelocityX = 5;
-    private float directionX = 1;
     public float shotDistance = 30;
 
     private int maxBullets = 0;
@@ -87,7 +86,7 @@ public class Player : MonoBehaviour
                 float verticalAxis = Input.GetAxisRaw("Vertical"); // Can be -1, 0 or 1
                 float horizontalAxis = Input.GetAxisRaw("Horizontal"); // Can be -1, 0 or 1
 
-                if (body.isGrounded)
+                if (body.IsGrounded)
                 {
                     if (verticalAxis > 0)
                     {
@@ -104,25 +103,15 @@ public class Player : MonoBehaviour
                     body.velocity.x += horizontalAxis * accelerationX * Time.deltaTime;
                     body.velocity.x = Mathf.Clamp(body.velocity.x, -maxVelocityX, maxVelocityX);
 
-                    if ((horizontalAxis > 0 && transform.localScale.x < 0) || (horizontalAxis < 0 && transform.localScale.x > 0))
-                    {
-                        // Flip the sprite.
-                        transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
-
-                        // When turning, move the player a little in the direction of movement to avoid stucking in walls.
-                        // It is a hack to compensate for the fact that the player's box collider is not centered relative
-                        // to the pivot point.
-                        transform.Translate(new Vector2(horizontalAxis * 0.4f, 0));
-                    }
-
                     if (horizontalAxis != 0)
                     {
-                        directionX = horizontalAxis;
+                        body.directionX = horizontalAxis;
+                        body.FlipIfNecessary();
                     }
                 }
 
                 // Jumping.
-                if (body.isGrounded && Input.GetButtonDown("Jump") && verticalAxis >= 0)
+                if (body.IsGrounded && Input.GetButtonDown("Jump") && verticalAxis >= 0)
                 {
                     body.velocity.y = jumpVelocityY;
                 }
@@ -141,7 +130,7 @@ public class Player : MonoBehaviour
                 }
 
                 // Open treasure door.
-                if (body.isGrounded && verticalAxis > 0)
+                if (body.IsGrounded && verticalAxis > 0)
                 {
                     Collider2D doorCollider = Physics2D.OverlapArea(boxCollider.bounds.min, boxCollider.bounds.max, 1 << LayerMask.NameToLayer("TreasureDoor"));
                     if (doorCollider)
@@ -159,7 +148,7 @@ public class Player : MonoBehaviour
 
                 if (verticalAxis == 0)
                 {
-                    if (body.isGrounded && body.velocity.x != 0)
+                    if (body.IsGrounded && body.velocity.x != 0)
                     {
                         animator.Play(Animator.StringToHash("Run"));
                     }
@@ -169,7 +158,7 @@ public class Player : MonoBehaviour
                     }
                 }
 
-                if (numBullets > 0 && Input.GetButtonDown("Fire1") && body.isGrounded)
+                if (numBullets > 0 && Input.GetButtonDown("Fire1") && body.IsGrounded)
                 {
                     // Shoot.
 
@@ -183,7 +172,7 @@ public class Player : MonoBehaviour
                     }
 
                     // Recoil
-                    body.velocity.x = -directionX * recoilVelocityX;
+                    body.velocity.x = -body.directionX * recoilVelocityX;
 
                     // Instantiate a gun shot animation.
                     GameObject gunShot = Instantiate(gunshotPrefab, shotEnd.position, Quaternion.identity) as GameObject;
@@ -206,7 +195,7 @@ public class Player : MonoBehaviour
                 }
 
                 // Ammo reloading.
-                if (numBullets < maxBullets && body.isGrounded && body.velocity.x == 0 && verticalAxis == 0)
+                if (numBullets < maxBullets && body.IsGrounded && body.velocity.x == 0 && verticalAxis == 0)
                 {
                     if (!IsReloading)
                     {

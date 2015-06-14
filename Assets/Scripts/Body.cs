@@ -11,8 +11,22 @@ public class Body : MonoBehaviour
     private BoxCollider2D boxCollider;
     public float skinWidth = 0.02f;
     public float gravity = -25f;
+    public float directionX = 1;
+    public float flipTranslateX = 0.4f;
+
     [HideInInspector]
-    public bool isGrounded = false;
+    public bool collisionLeft = false;
+    [HideInInspector]
+    public bool collisionRight = false;
+    [HideInInspector]
+    public bool collisionUp = false;
+    [HideInInspector]
+    public bool collisionDown = false;
+
+    public bool IsGrounded
+    {
+        get { return collisionDown; }
+    }
 
     private void Awake()
     {
@@ -22,7 +36,7 @@ public class Body : MonoBehaviour
     public void Move(bool ignoreOneWayPlatforms = false)
     {
         // Horizontal friction.
-        float frictionX = isGrounded ? groundFrictionX : airFrictionX;
+        float frictionX = IsGrounded ? groundFrictionX : airFrictionX;
         float velocityXAfterFriction = velocity.x - Mathf.Sign(velocity.x) * frictionX * Time.deltaTime;
         velocity.x = Mathf.Sign(velocityXAfterFriction) != Mathf.Sign(velocity.x) ? 0 : velocityXAfterFriction;
 
@@ -34,7 +48,11 @@ public class Body : MonoBehaviour
 
         Vector2 deltaMovement = velocity * Time.deltaTime;
 
-        isGrounded = false;
+        // Reset collision state.
+        collisionLeft = false;
+        collisionRight = false;
+        collisionUp = false;
+        collisionDown = false;
 
         Vector2 raycastOriginsBottomRight = new Vector2(boxCollider.bounds.max.x - skinWidth, boxCollider.bounds.min.y + skinWidth);
         Vector2 raycastOriginsBottomLeft = new Vector2(boxCollider.bounds.min.x + skinWidth, boxCollider.bounds.min.y + skinWidth);
@@ -67,10 +85,12 @@ public class Body : MonoBehaviour
                     if (isMovingRight)
                     {
                         deltaMovement.x -= skinWidth;
+                        collisionRight = true;
                     }
                     else
                     {
                         deltaMovement.x += skinWidth;
+                        collisionLeft = true;
                     }
 
                     if (rayDistance < skinWidth + skinWidthFloatFudgeFactor)
@@ -107,11 +127,12 @@ public class Body : MonoBehaviour
                     if (isMovingUp)
                     {
                         deltaMovement.y -= skinWidth;
+                        collisionUp = true;
                     }
                     else
                     {
                         deltaMovement.y += skinWidth;
-                        isGrounded = true;
+                        collisionDown = true;
                     }
 
                     if (rayDistance < skinWidth + skinWidthFloatFudgeFactor)
@@ -125,6 +146,19 @@ public class Body : MonoBehaviour
         if (Time.deltaTime > 0)
         {
             velocity = deltaMovement / Time.deltaTime;
+        }
+    }
+
+    public void FlipIfNecessary()
+    {
+        if ((directionX > 0 && transform.localScale.x < 0) || (directionX < 0 && transform.localScale.x > 0))
+        {
+            // Flip the sprite.
+            transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
+
+            // Move the body to avoid stucking in the walls.
+            // It's needed if the collider is not centered relative to the pivot point.
+            transform.Translate(new Vector2(directionX * flipTranslateX, 0));
         }
     }
 }

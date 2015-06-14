@@ -87,6 +87,34 @@ NavMeshSettings:
     cellSize: .166666672
     manualCellSize: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &43923920 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 120846, guid: be1d202e23bdac2498f8ab41eb4c304c, type: 2}
+  m_PrefabInternal: {fileID: 133719868}
+--- !u!114 &43923927
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 43923920}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c17d5a6244bb82f44adf85da1d6120a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  velocity: {x: 0, y: 0}
+  groundFrictionX: 30
+  airFrictionX: 5
+  horizontalRaysCount: 8
+  verticalRaysCount: 4
+  skinWidth: .0199999996
+  gravity: -25
+  directionX: -1
+  flipTranslateX: .400000006
+  collisionLeft: 0
+  collisionRight: 0
+  collisionUp: 0
+  collisionDown: 0
 --- !u!1001 &133719868
 Prefab:
   m_ObjectHideFlags: 0
@@ -1126,8 +1154,8 @@ MonoBehaviour:
   brushEndTileCol: 5
   brushEndTileRow: 0
   savedUVs: []
-  savedMeshCol: 38
-  savedMeshRow: 12
+  savedMeshCol: 33
+  savedMeshRow: 11
 --- !u!23 &1163590627
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1511,7 +1539,12 @@ MonoBehaviour:
   verticalRaysCount: 4
   skinWidth: .0199999996
   gravity: -25
-  isGrounded: 0
+  directionX: 1
+  flipTranslateX: .400000006
+  collisionLeft: 0
+  collisionRight: 0
+  collisionUp: 0
+  collisionDown: 0
 --- !u!1001 &1676331438
 Prefab:
   m_ObjectHideFlags: 0
