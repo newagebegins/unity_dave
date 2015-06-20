@@ -96,11 +96,11 @@ Prefab:
     m_Modifications:
     - target: {fileID: 489172, guid: be1d202e23bdac2498f8ab41eb4c304c, type: 2}
       propertyPath: m_LocalPosition.x
-      value: 33.5
+      value: 39.5
       objectReference: {fileID: 0}
     - target: {fileID: 489172, guid: be1d202e23bdac2498f8ab41eb4c304c, type: 2}
       propertyPath: m_LocalPosition.y
-      value: 4.5
+      value: 10.5
       objectReference: {fileID: 0}
     - target: {fileID: 489172, guid: be1d202e23bdac2498f8ab41eb4c304c, type: 2}
       propertyPath: m_LocalPosition.z
@@ -1293,7 +1293,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -563702343
-  m_SortingOrder: 1
+  m_SortingOrder: 2
   m_Sprite: {fileID: 21300006, guid: 1988243345bc389408ca808cacb5e22f, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
 --- !u!4 &1556864072
