@@ -126,10 +126,6 @@ Prefab:
       propertyPath: m_RootOrder
       value: 9
       objectReference: {fileID: 0}
-    - target: {fileID: 11413368, guid: be1d202e23bdac2498f8ab41eb4c304c, type: 2}
-      propertyPath: activeScanWidth
-      value: 11
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: be1d202e23bdac2498f8ab41eb4c304c, type: 2}
   m_IsPrefabParent: 0
@@ -1401,7 +1397,6 @@ MonoBehaviour:
   verticalRaysCount: 4
   skinWidth: .0199999996
   gravity: -25
-  directionX: 1
   flipTranslateX: .400000006
   collisionLeft: 0
   collisionRight: 0

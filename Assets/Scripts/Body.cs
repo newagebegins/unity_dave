@@ -11,7 +11,6 @@ public class Body : MonoBehaviour
     private BoxCollider2D boxCollider;
     public float skinWidth = 0.02f;
     public float gravity = -25f;
-    public float directionX = 1;
     public float flipTranslateX = 0.4f;
 
     [HideInInspector]
@@ -149,16 +148,23 @@ public class Body : MonoBehaviour
         }
     }
 
-    public void FlipIfNecessary()
+    public float DirectionX
     {
-        if ((directionX > 0 && transform.localScale.x < 0) || (directionX < 0 && transform.localScale.x > 0))
+        get
         {
-            // Flip the sprite.
-            transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
+            return Mathf.Sign(transform.localScale.x);
+        }
+        set
+        {
+            if ((value > 0 && transform.localScale.x < 0) || (value < 0 && transform.localScale.x > 0))
+            {
+                // Flip the sprite.
+                transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
 
-            // Move the body to avoid stucking in the walls.
-            // It's needed if the collider is not centered relative to the pivot point.
-            transform.Translate(new Vector2(directionX * flipTranslateX, 0));
+                // Move the body to avoid stucking in the walls.
+                // It's needed if the collider is not centered relative to the pivot point.
+                transform.Translate(new Vector2(value * flipTranslateX, 0));
+            }
         }
     }
 }

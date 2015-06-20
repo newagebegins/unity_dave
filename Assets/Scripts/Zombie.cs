@@ -31,15 +31,14 @@ public class Zombie : MonoBehaviour
     {
         if (isActive)
         {
-            body.velocity.x = body.directionX * speedX;
-            body.FlipIfNecessary();
+            body.velocity.x = body.DirectionX * speedX;
             body.Move();
 
             if (body.collisionLeft || body.collisionRight)
             {
                 // Horizontal collision.
 
-                body.directionX = -body.directionX;
+                body.DirectionX = -body.DirectionX;
 
                 // Don't search for player for some random time.
                 dontSearchForPlayerDuration = Random.Range(dontSearchForPlayerDurationMin, dontSearchForPlayerDurationMax);
@@ -63,7 +62,7 @@ public class Zombie : MonoBehaviour
                     // Found the player.
 
                     // Move towards the player.
-                    body.directionX = playerCollider.transform.position.x < transform.position.x ? -1 : 1;
+                    body.DirectionX = playerCollider.transform.position.x < transform.position.x ? -1 : 1;
                 }
             }
         }

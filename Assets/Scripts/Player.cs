@@ -105,8 +105,7 @@ public class Player : MonoBehaviour
 
                     if (horizontalAxis != 0)
                     {
-                        body.directionX = horizontalAxis;
-                        body.FlipIfNecessary();
+                        body.DirectionX = horizontalAxis;
                     }
                 }
 
@@ -172,7 +171,7 @@ public class Player : MonoBehaviour
                     }
 
                     // Recoil
-                    body.velocity.x = -body.directionX * recoilVelocityX;
+                    body.velocity.x = -body.DirectionX * recoilVelocityX;
 
                     // Instantiate a gun shot animation.
                     GameObject gunShot = Instantiate(gunshotPrefab, shotEnd.position, Quaternion.identity) as GameObject;
