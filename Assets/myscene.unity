@@ -96,7 +96,7 @@ Prefab:
     m_Modifications:
     - target: {fileID: 489172, guid: be1d202e23bdac2498f8ab41eb4c304c, type: 2}
       propertyPath: m_LocalPosition.x
-      value: 39.5
+      value: 35.9099998
       objectReference: {fileID: 0}
     - target: {fileID: 489172, guid: be1d202e23bdac2498f8ab41eb4c304c, type: 2}
       propertyPath: m_LocalPosition.y
@@ -125,6 +125,10 @@ Prefab:
     - target: {fileID: 489172, guid: be1d202e23bdac2498f8ab41eb4c304c, type: 2}
       propertyPath: m_RootOrder
       value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 489172, guid: be1d202e23bdac2498f8ab41eb4c304c, type: 2}
+      propertyPath: m_LocalScale.x
+      value: 12.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: be1d202e23bdac2498f8ab41eb4c304c, type: 2}
@@ -379,7 +383,6 @@ MonoBehaviour:
   player: {fileID: 1556864072}
   xSpan: 2
   ySpan: 2
-  drawBounds: 1
   xMin: 11.6000004
   yMin: 6.5
   xMax: 100
@@ -993,24 +996,24 @@ MonoBehaviour:
   meshRows: 64
   textureWidth: 64
   textureHeight: 64
-  tilesetSelectionMinCol: 6
-  tilesetSelectionMinRow: 1
-  tilesetSelectionMaxCol: 6
-  tilesetSelectionMaxRow: 1
-  sceneSelectionMinCol: 12
+  tilesetSelectionMinCol: 0
+  tilesetSelectionMinRow: 0
+  tilesetSelectionMaxCol: 0
+  tilesetSelectionMaxRow: 0
+  sceneSelectionMinCol: 0
   sceneSelectionMinRow: 0
-  sceneSelectionMaxCol: 35
-  sceneSelectionMaxRow: 13
+  sceneSelectionMaxCol: 0
+  sceneSelectionMaxRow: 0
   previewSavedUVs: []
   previewSavedMeshCol: 47
-  previewSavedMeshRow: 5
+  previewSavedMeshRow: 3
   previewSavedWidthInTiles: 1
   previewSavedHeightInTiles: 1
   brushUVs:
-  - {x: .75, y: .75}
-  - {x: .75, y: .875}
-  - {x: .875, y: .875}
-  - {x: .875, y: .75}
+  - {x: 0, y: .875}
+  - {x: 0, y: 1}
+  - {x: .125, y: 1}
+  - {x: .125, y: .875}
   brushWidth: 1
   brushHeight: 1
 --- !u!23 &1163590627
@@ -1303,7 +1306,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1556864070}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 10, y: 3, z: 0}
+  m_LocalPosition: {x: 36, y: 6, z: 0}
   m_LocalScale: {x: 12.5, y: 12.5, z: 1}
   m_Children:
   - {fileID: 1434163001}
@@ -1518,6 +1521,47 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 7
+--- !u!1 &1876515115
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 1876515117}
+  - 61: {fileID: 1876515116}
+  m_Layer: 13
+  m_Name: Stairs
+  m_TagString: Untagged
+  m_Icon: {fileID: 5721338939258241955, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!61 &1876515116
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1876515115}
+  m_Enabled: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_Offset: {x: 0, y: 0}
+  serializedVersion: 2
+  m_Size: {x: 8, y: 6}
+--- !u!4 &1876515117
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1876515115}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 43, y: 6, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 10
 --- !u!1 &2025616964
 GameObject:
   m_ObjectHideFlags: 0

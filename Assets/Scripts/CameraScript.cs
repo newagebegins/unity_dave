@@ -5,7 +5,6 @@ public class CameraScript : MonoBehaviour
     public Transform player;
     public float xSpan = 2f;
     public float ySpan = 2f;
-    public bool drawBounds = true;
     public float xMin = 0;
     public float yMin = 0;
     public float xMax = 100f;
@@ -18,13 +17,7 @@ public class CameraScript : MonoBehaviour
         float bottom = transform.position.y - ySpan;
         float top = transform.position.y + ySpan;
 
-        if (drawBounds)
-        {
-            Debug.DrawLine(new Vector3(right, bottom, 1), new Vector3(right, top, 1), Color.red);
-            Debug.DrawLine(new Vector3(left, bottom, 1), new Vector3(left, top, 1), Color.red);
-            Debug.DrawLine(new Vector3(left, bottom, 1), new Vector3(right, bottom, 1), Color.red);
-            Debug.DrawLine(new Vector3(left, top, 1), new Vector3(right, top, 1), Color.red);
-        }
+        DebugUtility.DrawRect(new Vector2(left, bottom), new Vector2(right, top), Color.red);
 
         float newX = transform.position.x;
         float newY = transform.position.y;
