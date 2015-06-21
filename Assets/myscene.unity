@@ -996,24 +996,24 @@ MonoBehaviour:
   meshRows: 64
   textureWidth: 64
   textureHeight: 64
-  tilesetSelectionMinCol: 0
-  tilesetSelectionMinRow: 0
-  tilesetSelectionMaxCol: 0
-  tilesetSelectionMaxRow: 0
+  tilesetSelectionMinCol: 3
+  tilesetSelectionMinRow: 1
+  tilesetSelectionMaxCol: 3
+  tilesetSelectionMaxRow: 1
   sceneSelectionMinCol: 0
   sceneSelectionMinRow: 0
   sceneSelectionMaxCol: 0
   sceneSelectionMaxRow: 0
   previewSavedUVs: []
   previewSavedMeshCol: 47
-  previewSavedMeshRow: 3
+  previewSavedMeshRow: 4
   previewSavedWidthInTiles: 1
   previewSavedHeightInTiles: 1
   brushUVs:
-  - {x: 0, y: .875}
-  - {x: 0, y: 1}
-  - {x: .125, y: 1}
-  - {x: .125, y: .875}
+  - {x: .375, y: .75}
+  - {x: .375, y: .875}
+  - {x: .5, y: .875}
+  - {x: .5, y: .75}
   brushWidth: 1
   brushHeight: 1
 --- !u!23 &1163590627

@@ -9,4 +9,9 @@ public class DebugUtility
         Debug.DrawLine(new Vector2(max.x, max.y), new Vector2(min.x, max.y), color);
         Debug.DrawLine(new Vector2(min.x, max.y), new Vector2(min.x, min.y), color);
     }
+
+    public static void DrawRect(Bounds bounds, Color color)
+    {
+        DrawRect(bounds.min, bounds.max, color);
+    }
 }
