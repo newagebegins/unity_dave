@@ -15,7 +15,7 @@ public class Zombie : MonoBehaviour
     public float activeScanWidth = 11;
     public float activeScanHeight = 6;
 
-    private bool isOnStairs = false;
+    private bool isWalkingDownStairs = false;
     private float stairsBottomY = 0;
     private float stairsStepTimer = 0;
     public float stairsStepDuration = 0.5f;
@@ -43,7 +43,7 @@ public class Zombie : MonoBehaviour
     {
         if (isActive)
         {
-            if (isOnStairs)
+            if (isWalkingDownStairs)
             {
                 stairsStepTimer += Time.deltaTime;
                 if (stairsStepTimer > stairsStepDuration)
@@ -59,7 +59,7 @@ public class Zombie : MonoBehaviour
                     
                     if (reachedStairsBottom || reachedPlayerYLevel)
                     {
-                        isOnStairs = false;
+                        isWalkingDownStairs = false;
                     }
                 }
             }
@@ -124,7 +124,7 @@ public class Zombie : MonoBehaviour
 
                         if (isOnOneWayPlatform && playerIsNearTheStairs && playerIsBelow)
                         {
-                            isOnStairs = true;
+                            isWalkingDownStairs = true;
                             stairsBottomY = stairsHit.collider.bounds.min.y;
                         }
                     }
