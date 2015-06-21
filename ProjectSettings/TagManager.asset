@@ -41,6 +41,21 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
-  - name: Foreground
-    uniqueID: 3731264953
+  - name: TreasureDoor
+    uniqueID: 2027718741
+    locked: 0
+  - name: Collectible
+    uniqueID: 4275130031
+    locked: 0
+  - name: Enemy
+    uniqueID: 923204085
+    locked: 0
+  - name: Player
+    uniqueID: 1328120031
+    locked: 0
+  - name: Projectile
+    uniqueID: 4051881929
+    locked: 0
+  - name: Points
+    uniqueID: 3325735809
     locked: 0

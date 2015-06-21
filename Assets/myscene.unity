@@ -124,11 +124,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 489172, guid: be1d202e23bdac2498f8ab41eb4c304c, type: 2}
       propertyPath: m_RootOrder
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 489172, guid: be1d202e23bdac2498f8ab41eb4c304c, type: 2}
-      propertyPath: m_LocalScale.x
-      value: -12.5
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: be1d202e23bdac2498f8ab41eb4c304c, type: 2}
@@ -1128,7 +1124,7 @@ MonoBehaviour:
   sceneSelectionMaxRow: 0
   previewSavedUVs: []
   previewSavedMeshCol: 47
-  previewSavedMeshRow: 4
+  previewSavedMeshRow: 9
   previewSavedWidthInTiles: 1
   previewSavedHeightInTiles: 1
   brushUVs:
@@ -1281,7 +1277,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 498026, guid: 19aba93e3e84a274ca8de42025bbd337, type: 2}
       propertyPath: m_RootOrder
-      value: 6
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 19aba93e3e84a274ca8de42025bbd337, type: 2}
@@ -1417,8 +1413,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: .5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: -563702343
-  m_SortingOrder: 3
+  m_SortingLayerID: 1328120031
+  m_SortingOrder: 0
   m_Sprite: {fileID: 21300006, guid: 1988243345bc389408ca808cacb5e22f, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
 --- !u!4 &1556864072
