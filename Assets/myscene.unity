@@ -1463,9 +1463,9 @@ MonoBehaviour:
   recoilVelocityX: 7
   shotDistance: 30
   ammoHUD: {fileID: 1155003971}
-  stayToReloadDuration: .800000012
+  stayToReloadDuration: .5
   gunshotPrefab: {fileID: 112502, guid: d7d641e954a9de64aa95472414fe956e, type: 2}
-  shootDuration: .5
+  shootDuration: .300000012
   openDoorDuration: .5
   ignoreOneWayPlatformsDuration: .100000001
 --- !u!95 &1556864075

@@ -10,6 +10,7 @@ public class Player : MonoBehaviour
         OpenDoor,
         Dead,
     }
+    [HideInInspector]
     public State state = State.Normal;
 
     private Body body;
