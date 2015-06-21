@@ -2,6 +2,11 @@
 
 public class Enemy : MonoBehaviour
 {
+    // Enemy is inactive until the player comes close enough.
+    public bool isActive = false;
+    public float activeScanWidth = 11;
+    public float activeScanHeight = 6;
+
     public int health = 2;
     public int scoreValue = 100;
     private Game game;
@@ -24,12 +29,27 @@ public class Enemy : MonoBehaviour
 
     private void Update()
     {
-        if (isFlashing)
+        if (isActive)
         {
-            flashTimer += Time.deltaTime;
-            if (flashTimer > flashDuration)
+            if (isFlashing)
             {
-                StopFlashing();
+                flashTimer += Time.deltaTime;
+                if (flashTimer > flashDuration)
+                {
+                    StopFlashing();
+                }
+            }
+        }
+        else
+        {
+            // Check if the player is close.
+            Vector2 playerScanMin = new Vector2(transform.position.x - activeScanWidth, transform.position.y - activeScanHeight);
+            Vector2 playerScanMax = new Vector2(transform.position.x + activeScanWidth, transform.position.y + activeScanHeight);
+            DebugUtility.DrawRect(playerScanMin, playerScanMax, Color.green);
+            Collider2D playerCollider = Physics2D.OverlapArea(playerScanMin, playerScanMax, 1 << LayerMask.NameToLayer("Player"));
+            if (playerCollider)
+            {
+                isActive = true;
             }
         }
     }

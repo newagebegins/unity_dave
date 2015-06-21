@@ -10,6 +10,7 @@ public class KnifeThrower : MonoBehaviour
     private State state = State.Normal;
 
     private Body body;
+    private Enemy enemy;
     private BoxCollider2D boxCollider;
     private Animator animator;
     public float speedX = 8;
@@ -25,6 +26,7 @@ public class KnifeThrower : MonoBehaviour
     private void Awake()
     {
         body = GetComponent<Body>();
+        enemy = GetComponent<Enemy>();
         boxCollider = GetComponent<BoxCollider2D>();
         animator = GetComponent<Animator>();
 
@@ -38,7 +40,7 @@ public class KnifeThrower : MonoBehaviour
         {
             animator.speed = 0;
         }
-        else
+        else if (enemy.isActive)
         {
             switch (state)
             {
