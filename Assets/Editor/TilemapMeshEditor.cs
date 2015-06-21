@@ -153,7 +153,6 @@ public class LevelScriptEditor : Editor
         {
             if (GUILayout.Button("Selection Mode On"))
             {
-                tilemapMesh.brushUVs.Clear();
                 tilemapMesh.isSelectionMode = true;
                 SceneView.RepaintAll();
             }
