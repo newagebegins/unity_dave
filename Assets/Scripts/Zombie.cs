@@ -68,10 +68,30 @@ public class Zombie : MonoBehaviour
                 body.velocity.x = body.DirectionX * speedX;
                 body.Move();
 
-                if (body.collisionLeft || body.collisionRight)
+                bool hasPlatformAhead = false;
                 {
-                    // Horizontal collision.
+                    // Detect when zombie might fall off a platform.
 
+                    Vector2 platformEndRayOrigin = new Vector2();
+                    platformEndRayOrigin.y = boxCollider.bounds.min.y;
+                    if (body.DirectionX > 0)
+                    {
+                        platformEndRayOrigin.x = boxCollider.bounds.max.x;
+                    }
+                    else
+                    {
+                        platformEndRayOrigin.x = boxCollider.bounds.min.x;
+                    }
+                    Vector2 platformEndRayDirection = Vector2.down;
+                    float platformEndRayDistance = 0.5f;
+                    int platformEndLayerMask = 1 << LayerMask.NameToLayer("Default") | 1 << LayerMask.NameToLayer("OneWayPlatform");
+                    Debug.DrawRay(platformEndRayOrigin, platformEndRayDirection * platformEndRayDistance, Color.yellow);
+                    hasPlatformAhead = Physics2D.Raycast(platformEndRayOrigin, platformEndRayDirection, platformEndRayDistance, platformEndLayerMask);
+                }
+
+                if (body.collisionLeft || body.collisionRight || !hasPlatformAhead)
+                {
+                    // Turn around.
                     body.DirectionX = -body.DirectionX;
 
                     // Don't search for player for some random time.
