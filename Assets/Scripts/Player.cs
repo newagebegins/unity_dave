@@ -79,6 +79,8 @@ public class Player : MonoBehaviour
             Image bulletImage = bulletTransform.GetComponent<Image>();
             bulletImages[i] = bulletImage;
         }
+
+        screenFaderAnimator.Play(Animator.StringToHash("FadeToClear"));
     }
 
     private void Update()
