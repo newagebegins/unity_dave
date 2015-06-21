@@ -28,8 +28,8 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 120846}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 39.5, y: 10.5, z: 0}
-  m_LocalScale: {x: -12.5, y: 12.5, z: 1}
+  m_LocalPosition: {x: 35.9099998, y: 10.5, z: 0}
+  m_LocalScale: {x: 12.5, y: 12.5, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -78,6 +78,7 @@ MonoBehaviour:
   playerScanWidth: 10
   activeScanWidth: 11
   activeScanHeight: 6
+  stairsStepDuration: .5
   dontSearchForPlayerDurationMin: .300000012
   dontSearchForPlayerDurationMax: 1.5
 --- !u!114 &11465298

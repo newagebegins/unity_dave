@@ -3,16 +3,17 @@ using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
-    enum PlayerState
+    public enum State
     {
         Normal,
         Shoot,
         OpenDoor,
+        Dead,
     }
+    public State state = State.Normal;
 
     private Body body;
     private TreasureDoor treasureDoor;
-    private PlayerState state = PlayerState.Normal;
     private Game game;
     public float accelerationX = 50;
     public float maxVelocityX = 8;
@@ -22,6 +23,8 @@ public class Player : MonoBehaviour
     private Animator animator;
     public float recoilVelocityX = 5;
     public float shotDistance = 30;
+    
+    private Animator screenFaderAnimator;
 
     private int maxBullets = 0;
     private int numBullets = 0;
@@ -63,6 +66,9 @@ public class Player : MonoBehaviour
         shotStart = transform.Find("ShotStart");
         shotEnd = transform.Find("ShotEnd");
         game = Camera.main.GetComponent<Game>();
+        
+        GameObject screenFader = GameObject.Find("ScreenFader");
+        screenFaderAnimator = screenFader.GetComponent<Animator>();
 
         maxBullets = ammoHUD.transform.childCount;
         numBullets = maxBullets;
@@ -77,12 +83,12 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        body.Move(IsIgnoringOneWayPlatforms);
-
         switch (state)
         {
-            case PlayerState.Normal:
+            case State.Normal:
             {
+                body.Move(IsIgnoringOneWayPlatforms);
+                
                 float verticalAxis = Input.GetAxisRaw("Vertical"); // Can be -1, 0 or 1
                 float horizontalAxis = Input.GetAxisRaw("Horizontal"); // Can be -1, 0 or 1
 
@@ -138,7 +144,7 @@ public class Player : MonoBehaviour
                         if (treasureDoor.IsClosed)
                         {
                             body.velocity.x = 0;
-                            state = PlayerState.OpenDoor;
+                            state = State.OpenDoor;
                             openDoorTimer = 0;
                             animator.Play(Animator.StringToHash("OpenDoor"));
                         }
@@ -163,7 +169,7 @@ public class Player : MonoBehaviour
 
                     --numBullets;
                     shootTimer = 0;
-                    state = PlayerState.Shoot;
+                    state = State.Shoot;
 
                     if (verticalAxis == 0)
                     {
@@ -219,24 +225,38 @@ public class Player : MonoBehaviour
                 break;
             }
 
-            case PlayerState.Shoot:
+            case State.Shoot:
             {
+                body.Move(IsIgnoringOneWayPlatforms);
                 shootTimer += Time.deltaTime;
                 if (shootTimer > shootDuration)
                 {
-                    state = PlayerState.Normal;
+                    state = State.Normal;
                 }
                 break;
             }
 
-            case PlayerState.OpenDoor:
+            case State.OpenDoor:
             {
                 openDoorTimer += Time.deltaTime;
                 if (openDoorTimer > openDoorDuration)
                 {
-                    state = PlayerState.Normal;
+                    state = State.Normal;
                     treasureDoor.Open();
                 }
+                break;
+            }
+
+            case State.Dead:
+            {
+                animator.speed = 0;
+
+                AnimatorStateInfo info = screenFaderAnimator.GetCurrentAnimatorStateInfo(0);
+                if (info.IsName("FadeToBlack") && info.normalizedTime > 1)
+                {
+                    Application.LoadLevel(Application.loadedLevel);
+                }
+                
                 break;
             }
 
@@ -264,5 +284,11 @@ public class Player : MonoBehaviour
             game.CreatePoints(collision.transform.position, collectible.scoreValue);
             Destroy(collision.gameObject);
         }
+    }
+
+    public void Kill()
+    {
+        state = State.Dead;
+        screenFaderAnimator.Play(Animator.StringToHash("FadeToBlack"));
     }
 }
