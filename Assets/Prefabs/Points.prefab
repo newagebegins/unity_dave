@@ -25,7 +25,7 @@ GameObject:
   - 4: {fileID: 439164}
   - 95: {fileID: 9548300}
   - 212: {fileID: 21277528}
-  - 114: {fileID: 11459736}
+  - 114: {fileID: 11442402}
   m_Layer: 0
   m_Name: Animation
   m_TagString: Untagged
@@ -52,7 +52,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 111088}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 22.0313587, y: 5.97067118, z: 0}
+  m_LocalPosition: {x: 21.8591385, y: 5.91166306, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 439164}
@@ -75,7 +75,7 @@ Animator:
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
---- !u!114 &11459736
+--- !u!114 &11442402
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -83,7 +83,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 130388}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3fbbf3a015bef9643a07440a64ce838c, type: 3}
+  m_Script: {fileID: 11500000, guid: 900cb3b36f06c5049b33b21eed70adb2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!212 &21277528
