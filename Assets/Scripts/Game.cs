@@ -43,7 +43,7 @@ public class Game : MonoBehaviour
             Vector2 dir = new Vector2(Mathf.Cos(randomAngle), Mathf.Sin(randomAngle));
             Vector2 velocity = dir * Random.Range(8, 20);
             body.velocity = velocity;
-            float lifeTime = Random.Range(5f, 12f) / 10f;
+            float lifeTime = Random.Range(1.0f, 2.4f);
             Destroy(fleshObj, lifeTime);
         }
     }
