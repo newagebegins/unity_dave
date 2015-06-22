@@ -57,7 +57,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   velocity: {x: 0, y: 0}
   groundFrictionX: 30
-  airFrictionX: 5
+  airFrictionX: 3
   horizontalRaysCount: 8
   verticalRaysCount: 4
   skinWidth: .0199999996
@@ -119,6 +119,10 @@ Prefab:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: 0a87330f499dfa741bd34a4c28294a41, type: 2}
+    - target: {fileID: 0}
+      propertyPath: airFrictionX
+      value: 3
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
   m_RootGameObject: {fileID: 189514}

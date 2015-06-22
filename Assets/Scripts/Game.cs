@@ -35,13 +35,14 @@ public class Game : MonoBehaviour
     public GameObject fleshPrefab;
     public void CreateFleshChunks(Vector3 position)
     {
-        for (int i = 0; i < 4; ++i)
+        int chunkCount = Random.Range(3, 6);
+        for (int i = 0; i < chunkCount; ++i)
         {
             GameObject fleshObj = Instantiate(fleshPrefab, position, Quaternion.identity) as GameObject;
             Body body = fleshObj.GetComponent<Body>();
-            float randomAngle = Random.Range(20, 160) * Mathf.Deg2Rad;
+            float randomAngle = Random.Range(40f, 140f) * Mathf.Deg2Rad;
             Vector2 dir = new Vector2(Mathf.Cos(randomAngle), Mathf.Sin(randomAngle));
-            Vector2 velocity = dir * Random.Range(8, 20);
+            Vector2 velocity = dir * Random.Range(5f, 15f);
             body.velocity = velocity;
             float lifeTime = Random.Range(1.0f, 2.4f);
             Destroy(fleshObj, lifeTime);

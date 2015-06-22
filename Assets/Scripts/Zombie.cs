@@ -188,10 +188,14 @@ public class Zombie : MonoBehaviour
         }
     }
 
-    private bool PlayerIsInAttackRange()
+    private bool PlayerIsInAttackRange(Vector3? expandRange = null)
     {
         Bounds rangeBounds = boxCollider.bounds;
-        rangeBounds.Expand(new Vector3(0.6f, 0, 0));
+        rangeBounds.Expand(new Vector3(0.6f, -1f, 0));
+        if (expandRange != null)
+        {
+            rangeBounds.Expand((Vector3)expandRange);
+        }
         DebugUtility.DrawRect(rangeBounds, Color.magenta);
         bool result = Physics2D.OverlapArea(rangeBounds.min, rangeBounds.max, 1 << LayerMask.NameToLayer("Player"));
         return result;
@@ -199,7 +203,7 @@ public class Zombie : MonoBehaviour
 
     public void OnAnimPunch()
     {
-        if (PlayerIsInAttackRange())
+        if (PlayerIsInAttackRange(new Vector3(2f, 0, 0)))
         {
             player.Kill();
         }
