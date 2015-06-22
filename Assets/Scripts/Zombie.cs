@@ -131,7 +131,7 @@ public class Zombie : MonoBehaviour
                             bool isOnOneWayPlatform = leftHit && rightHit;
 
                             Bounds stairsBounds = stairsHit.collider.bounds;
-                            stairsBounds.Expand(2f);
+                            stairsBounds.Expand(new Vector3(4, 0, 0));
                             DebugUtility.DrawRect(stairsBounds, Color.magenta);
                             bool playerIsNearTheStairs = Physics2D.OverlapArea(stairsBounds.min, stairsBounds.max, 1 << LayerMask.NameToLayer("Player"));
                             bool playerIsBelow = (boxCollider.bounds.min.y - stairsYEpsilon) > playerCollider.bounds.min.y;
