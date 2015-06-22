@@ -92,8 +92,27 @@ public class Player : MonoBehaviour
             {
                 body.Move(IsIgnoringOneWayPlatforms);
                 
-                float verticalAxis = Input.GetAxisRaw("Vertical"); // Can be -1, 0 or 1
-                float horizontalAxis = Input.GetAxisRaw("Horizontal"); // Can be -1, 0 or 1
+                float verticalAxis = Input.GetAxisRaw("Vertical");
+                float horizontalAxis = Input.GetAxisRaw("Horizontal");
+
+                // Snap values for analog sticks.
+                if (verticalAxis < 0)
+                {
+                    verticalAxis = -1;
+                }
+                else if (verticalAxis > 0)
+                {
+                    verticalAxis = 1;
+                }
+
+                if (horizontalAxis < 0)
+                {
+                    horizontalAxis = -1;
+                }
+                else if (horizontalAxis > 0)
+                {
+                    horizontalAxis = 1;
+                }
 
                 if (body.IsGrounded)
                 {
