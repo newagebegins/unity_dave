@@ -16,7 +16,7 @@ TagManager:
   - Player
   - OneWayPlatform
   - Collectible
-  - TreasureDoor
+  - Door
   - Enemy
   - Stairs
   - Projectile
@@ -41,7 +41,7 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
-  - name: TreasureDoor
+  - name: Door
     uniqueID: 2027718741
     locked: 0
   - name: Collectible

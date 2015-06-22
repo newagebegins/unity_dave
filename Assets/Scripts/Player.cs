@@ -14,7 +14,7 @@ public class Player : MonoBehaviour
     public State state = State.Normal;
 
     private Body body;
-    private TreasureDoor treasureDoor;
+    private Door door;
     private Game game;
     public float accelerationX = 50;
     public float maxVelocityX = 8;
@@ -137,19 +137,27 @@ public class Player : MonoBehaviour
                     body.velocity.y += jumpReductionVelocityY;
                 }
 
-                // Open treasure door.
+                // Open a door.
                 if (body.IsGrounded && verticalAxis > 0)
                 {
-                    Collider2D doorCollider = Physics2D.OverlapArea(boxCollider.bounds.min, boxCollider.bounds.max, 1 << LayerMask.NameToLayer("TreasureDoor"));
+                    Collider2D doorCollider = Physics2D.OverlapArea(boxCollider.bounds.min, boxCollider.bounds.max, 1 << LayerMask.NameToLayer("Door"));
                     if (doorCollider)
                     {
-                        treasureDoor = doorCollider.GetComponent<TreasureDoor>();
-                        if (treasureDoor.IsClosed)
+                        door = doorCollider.GetComponent<Door>();
+                        if (door.isClosed)
                         {
                             body.velocity.x = 0;
                             state = State.OpenDoor;
                             openDoorTimer = 0;
                             animator.Play(Animator.StringToHash("OpenDoor"));
+                        }
+                        else
+                        {
+                            if (door.GetComponent<ExitDoor>())
+                            {
+                                animator.Play(Animator.StringToHash("OpenDoor"));
+                                Kill();
+                            }
                         }
                     }
                 }
@@ -246,7 +254,7 @@ public class Player : MonoBehaviour
                 if (openDoorTimer > openDoorDuration)
                 {
                     state = State.Normal;
-                    treasureDoor.Open();
+                    door.Open();
                 }
                 break;
             }

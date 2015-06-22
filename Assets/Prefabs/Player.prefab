@@ -82,7 +82,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 195284}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 9, y: 3, z: 0}
+  m_LocalPosition: {x: 63.4199982, y: 32.3199997, z: 0}
   m_LocalScale: {x: 12.5, y: 12.5, z: 1}
   m_Children:
   - {fileID: 400610}
@@ -175,7 +175,7 @@ MonoBehaviour:
   jumpVelocityY: 13
   jumpReductionVelocityY: -1
   recoilVelocityX: 7
-  shotDistance: 30
+  shotDistance: 16
   ammoHUD: {fileID: 0}
   stayToReloadDuration: .5
   gunshotPrefab: {fileID: 112502, guid: d7d641e954a9de64aa95472414fe956e, type: 2}

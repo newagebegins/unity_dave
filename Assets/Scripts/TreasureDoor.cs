@@ -23,20 +23,12 @@ public class TreasureDoor : MonoBehaviour
         }
     }
 
-    public bool IsClosed
+    private void OnOpenDoor()
     {
-        get { return spriteRenderer.sprite == closedSprite; }
-    }
-
-    public void Open()
-    {
-        if (IsClosed)
+        spriteRenderer.sprite = openSprite;
+        foreach (GameObject collectible in collectibles)
         {
-            spriteRenderer.sprite = openSprite;
-            foreach (GameObject collectible in collectibles)
-            {
-                collectible.SetActive(true);
-            }
+            collectible.SetActive(true);
         }
     }
 }
