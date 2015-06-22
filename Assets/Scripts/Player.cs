@@ -130,11 +130,10 @@ public class Player : MonoBehaviour
                     // Horizontal acceleration.
                     body.velocity.x += horizontalAxis * accelerationX * Time.deltaTime;
                     body.velocity.x = Mathf.Clamp(body.velocity.x, -maxVelocityX, maxVelocityX);
-
-                    if (horizontalAxis != 0)
-                    {
-                        body.DirectionX = horizontalAxis;
-                    }
+                }
+                if (horizontalAxis != 0)
+                {
+                    body.DirectionX = horizontalAxis;
                 }
 
                 // Jumping.
