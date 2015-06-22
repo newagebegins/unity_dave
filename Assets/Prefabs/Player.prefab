@@ -152,7 +152,7 @@ MonoBehaviour:
   horizontalRaysCount: 8
   verticalRaysCount: 4
   skinWidth: .0199999996
-  gravity: -25
+  gravity: -35
   flipTranslateX: .400000006
   collisionLeft: 0
   collisionRight: 0
@@ -172,7 +172,7 @@ MonoBehaviour:
   state: 0
   accelerationX: 50
   maxVelocityX: 8
-  jumpVelocityY: 13
+  jumpVelocityY: 15
   jumpReductionVelocityY: -1
   recoilVelocityX: 5
   shotDistance: 16
