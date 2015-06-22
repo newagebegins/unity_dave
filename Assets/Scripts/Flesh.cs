@@ -12,5 +12,11 @@ public class Flesh : MonoBehaviour
     private void Update()
     {
         body.Move();
+
+        if (body.collisionLeft || body.collisionRight)
+        {
+            // Bounce off walls.
+            body.velocity.x = -body.velocity.x;
+        }
     }
 }
