@@ -2,10 +2,8 @@
 
 public class Enemy : MonoBehaviour
 {
-    // Enemy is inactive until the player comes close enough.
+    // Enemy is inactive until the camera sees him for the first time.
     public bool isActive = false;
-    public float activeScanWidth = 11;
-    public float activeScanHeight = 6;
 
     public int health = 2;
     public int scoreValue = 100;
@@ -18,6 +16,7 @@ public class Enemy : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private Shader guiTextShader;
     private Shader defaultShader;
+    private BoxCollider2D boxCollider;
 
     private void Start()
     {
@@ -25,6 +24,7 @@ public class Enemy : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         guiTextShader = Shader.Find("GUI/Text Shader");
         defaultShader = Shader.Find("Sprites/Default");
+        boxCollider = GetComponent<BoxCollider2D>();
     }
 
     private void Update()
@@ -42,16 +42,28 @@ public class Enemy : MonoBehaviour
         }
         else
         {
-            // Check if the player is close.
-            Vector2 playerScanMin = new Vector2(transform.position.x - activeScanWidth, transform.position.y - activeScanHeight);
-            Vector2 playerScanMax = new Vector2(transform.position.x + activeScanWidth, transform.position.y + activeScanHeight);
-            DebugUtility.DrawRect(playerScanMin, playerScanMax, Color.green);
-            Collider2D playerCollider = Physics2D.OverlapArea(playerScanMin, playerScanMax, 1 << LayerMask.NameToLayer("Player"));
-            if (playerCollider)
+            // Check if camera can see us.
+            Bounds bounds = boxCollider.bounds;
+            Vector2 leftBottom = Camera.main.WorldToViewportPoint(new Vector2(bounds.min.x, bounds.min.y));
+            Vector2 rightBottom = Camera.main.WorldToViewportPoint(new Vector2(bounds.max.x, bounds.min.y));
+            Vector2 rightTop = Camera.main.WorldToViewportPoint(new Vector2(bounds.max.x, bounds.max.y));
+            Vector2 leftTop = Camera.main.WorldToViewportPoint(new Vector2(bounds.min.x, bounds.max.y));
+
+            if (IsPointInViewport(leftBottom) ||
+                IsPointInViewport(rightBottom) ||
+                IsPointInViewport(rightTop) ||
+                IsPointInViewport(leftTop))
             {
                 isActive = true;
             }
         }
+    }
+
+    private bool IsPointInViewport(Vector2 point)
+    {
+        bool result = point.x >= 0 && point.x <= 1 &&
+                      point.y >= 0 && point.y <= 1;
+        return result;
     }
 
     public void Hit()
