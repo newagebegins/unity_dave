@@ -180,7 +180,7 @@ MonoBehaviour:
   stayToReloadDuration: .400000006
   gunshotPrefab: {fileID: 112502, guid: d7d641e954a9de64aa95472414fe956e, type: 2}
   shootDuration: .300000012
-  openDoorDuration: .5
+  openDoorDuration: .300000012
   ignoreOneWayPlatformsDuration: .100000001
 --- !u!212 &21232650
 SpriteRenderer:

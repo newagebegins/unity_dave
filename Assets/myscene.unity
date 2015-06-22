@@ -2706,7 +2706,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 456184, guid: acb0c19814d03cd4da3a58c28209d0ea, type: 2}
       propertyPath: m_RootOrder
-      value: 24
+      value: 26
       objectReference: {fileID: 0}
     - target: {fileID: 11485922, guid: acb0c19814d03cd4da3a58c28209d0ea, type: 2}
       propertyPath: ammoHUD
