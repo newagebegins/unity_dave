@@ -944,8 +944,8 @@ MonoBehaviour:
   ySpan: 2
   xMin: 11.6000004
   yMin: 6.5
-  xMax: 100
-  yMax: 100
+  xMax: 57.4000015
+  yMax: 28.5
 --- !u!114 &365623937
 MonoBehaviour:
   m_ObjectHideFlags: 0
