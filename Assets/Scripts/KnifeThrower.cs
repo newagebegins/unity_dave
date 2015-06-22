@@ -100,7 +100,7 @@ public class KnifeThrower : MonoBehaviour
     {
         nextThrowTimer = 0;
         nextThrowDuration = Random.Range(1f, 3f);
-        GameObject knifeObj = Instantiate(knifePrefab, transform.position, Quaternion.identity) as GameObject;
+        GameObject knifeObj = Instantiate(knifePrefab, transform.position + new Vector3(0, 0.5f, 0), Quaternion.identity) as GameObject;
         knifeObj.GetComponent<Body>().DirectionX = body.DirectionX;
     }
 }

@@ -56,16 +56,19 @@ public class Enemy : MonoBehaviour
 
     public void Hit()
     {
-        health--;
-        if (health <= 0)
+        if (isActive)
         {
-            game.CreateFleshChunks(transform.position);
-            game.CreatePoints(transform.position, scoreValue);
-            Destroy(gameObject);
-        }
-        else
-        {
-            StartFlashing();
+            health--;
+            if (health <= 0)
+            {
+                game.CreateFleshChunks(transform.position);
+                game.CreatePoints(transform.position, scoreValue);
+                Destroy(gameObject);
+            }
+            else
+            {
+                StartFlashing();
+            }
         }
     }
 

@@ -190,6 +190,7 @@ public class Player : MonoBehaviour
                     // Do a raycast to see if we hit something.
                     int layerMask = 1 << LayerMask.NameToLayer("Default") | 1 << LayerMask.NameToLayer("Enemy");
                     Vector2 shotDirection = shotEnd.position - shotStart.position;
+                    Debug.DrawRay(shotStart.position, shotDirection * shotDistance, Color.magenta, 0.3f);
                     RaycastHit2D hit = Physics2D.Raycast(shotStart.position, shotDirection, shotDistance, layerMask);
                     if (hit)
                     {
