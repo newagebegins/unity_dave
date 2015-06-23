@@ -116,6 +116,7 @@ MonoBehaviour:
   isActive: 0
   health: 2
   scoreValue: 100
+  fleshChunkCount: 2
 --- !u!212 &21290246
 SpriteRenderer:
   m_ObjectHideFlags: 1
@@ -156,6 +157,10 @@ Prefab:
     - target: {fileID: 0}
       propertyPath: m_SortingOrder
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: fleshChunkCount
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}

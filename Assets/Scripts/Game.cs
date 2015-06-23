@@ -33,19 +33,48 @@ public class Game : MonoBehaviour
     }
 
     public GameObject fleshPrefab;
-    public void CreateFleshChunks(Vector3 position)
+    public void CreateFleshChunks(Vector3 position, int count)
     {
-        int chunkCount = Random.Range(3, 6);
-        for (int i = 0; i < chunkCount; ++i)
+        switch (count)
         {
-            GameObject fleshObj = Instantiate(fleshPrefab, position, Quaternion.identity) as GameObject;
-            Body body = fleshObj.GetComponent<Body>();
-            float randomAngle = Random.Range(40f, 140f) * Mathf.Deg2Rad;
-            Vector2 dir = new Vector2(Mathf.Cos(randomAngle), Mathf.Sin(randomAngle));
-            Vector2 velocity = dir * Random.Range(5f, 15f);
-            body.velocity = velocity;
-            float lifeTime = Random.Range(1.0f, 2.4f);
-            Destroy(fleshObj, lifeTime);
+            case 4:
+            {
+                CreateFleshChunk(position, 45);
+                CreateFleshChunk(position, 135);
+                CreateFleshChunk(position, 210);
+                CreateFleshChunk(position, 330);
+                break;
+            }
+            case 2:
+            {
+                CreateFleshChunk(position, 45);
+                CreateFleshChunk(position, 135);
+                break;
+            }
+            default:
+            {
+                Debug.LogError("Unsupported flesh chunk count: " + count);
+                break;
+            }
         }
+    }
+
+    private void CreateFleshChunk(Vector3 position, float angleDeg)
+    {
+        GameObject fleshObj = Instantiate(fleshPrefab, position, Quaternion.identity) as GameObject;
+        Body body = fleshObj.GetComponent<Body>();
+        float angleRad = angleDeg * Mathf.Deg2Rad;
+        Vector2 dir = new Vector2(Mathf.Cos(angleRad), Mathf.Sin(angleRad));
+        float speed;
+        if (angleDeg >= 0 && angleDeg <= 180)
+        {
+            speed = Random.Range(5f, 15f);
+        }
+        else
+        {
+            speed = Random.Range(2f, 8f);
+        }
+        Vector2 velocity = dir * speed;
+        body.velocity = velocity;
     }
 }

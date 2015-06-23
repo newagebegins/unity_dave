@@ -7,6 +7,7 @@ public class Enemy : MonoBehaviour
 
     public int health = 2;
     public int scoreValue = 100;
+    public int fleshChunkCount = 4;
     private Game game;
 
     private const float flashDuration = 0.1f;
@@ -73,7 +74,7 @@ public class Enemy : MonoBehaviour
             health--;
             if (health <= 0)
             {
-                game.CreateFleshChunks(transform.position);
+                game.CreateFleshChunks(transform.position, fleshChunkCount);
                 game.CreatePoints(transform.position, scoreValue);
                 Destroy(gameObject);
             }
