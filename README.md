@@ -1,7 +1,8 @@
 The game in this repository uses [Unity](http://unity3d.com/) engine to recreate a simplified version of the first level from ["Dangerous Dave in the Haunted Mansion"](http://www.mobygames.com/game/dangerous-dave-in-the-haunted-mansion).
 
-You can play the game online in your web browser (unfortunately Unity Web Player doesn't work in Google Chrome, so you should use some other web browser like Firefox, Opera or Internet Explorer):  
-http://newagebegins.github.io/unity_dave/WebBuild/WebBuild.html
+You can play the game online in your web browser (unfortunately Unity Web Player doesn't work in Google Chrome, so you should use some other web browser like Firefox, Opera or Internet Explorer):
+
+[PLAY ONLINE](http://newagebegins.github.io/unity_dave/WebBuild/WebBuild.html)
 
 Some notes about this implementation:
 * Contains a simple mesh-based tilemap editor
